@@ -105,6 +105,9 @@
     <ClCompile Include="common_platform.cpp">
       <Filter>Source Files\FMOD</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h">
@@ -190,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="common_platform.h">
       <Filter>Header Files\FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicText.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

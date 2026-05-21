@@ -22,6 +22,7 @@
     <ClCompile Include="AnimatedSprite.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="common_platform.cpp" />
+    <ClCompile Include="DynamicText.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="inputsystem.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="common_platform.h" />
+    <ClInclude Include="DynamicText.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="inlinehelpers.h" />
     <ClInclude Include="inputsystem.h" />
@@ -116,22 +118,6 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\SKRT\PropertySheet.props" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\SKRT\PropertySheet.props" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\SKRT\PropertySheet.props" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\SKRT\PropertySheet.props" />
-  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)game\</OutDir>
@@ -162,7 +148,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\SDL2-2.0.22\lib\x86;$(SolutionDir)lib\SDL2_image-2.6.1\lib\x86;$(SolutionDir)lib\glew-2.1.0\lib\x86;$(SolutionDir)lib\SDL2_ttf-2.22.0\lib\x86\;$(SolutionDir)lib\FMOD\lib\x86;$(SolutionDir)lib\box2d\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\SDL2-2.0.22\lib\x86;$(SolutionDir)lib\SDL2_image-2.6.1\lib\x86;$(SolutionDir)lib\glew-2.1.0\lib\x86;$(SolutionDir)lib\SDL2_ttf-2.22.0\lib\x86\;$(SolutionDir)lib\FMOD\lib\x86\;$(SolutionDir)lib\box2d\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;SDL2_image.lib;glew32.lib;opengl32.lib;SDL2.lib;SDL2_ttf.lib;fmod_vc.lib;fmodl_vc.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
     </Link>
