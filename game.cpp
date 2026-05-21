@@ -16,7 +16,7 @@
 #include "fmod.h"
 #include "fmod.hpp"
 #include "box2d.h"
-#include "../SKRT/lib/FMOD/include/fmod_errors.h"
+#include "lib/FMOD//include/fmod_errors.h"
 // Static Members:
 Game* Game::sm_pInstance = 0;
 Game& Game::GetInstance()
