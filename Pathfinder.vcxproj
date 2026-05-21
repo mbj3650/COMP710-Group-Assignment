@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SKRT\lib\FMOD\include\common.cpp" />
-    <ClCompile Include="..\SKRT\lib\FMOD\include\common_platform.cpp" />
     <ClCompile Include="AnimatedSprite.cpp" />
+    <ClCompile Include="common.cpp" />
+    <ClCompile Include="common_platform.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="inputsystem.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
@@ -47,9 +47,9 @@
     <ClCompile Include="XboxController.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\SKRT\lib\FMOD\include\common.h" />
-    <ClInclude Include="..\SKRT\lib\FMOD\include\common_platform.h" />
     <ClInclude Include="AnimatedSprite.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="common_platform.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="inlinehelpers.h" />
     <ClInclude Include="inputsystem.h" />

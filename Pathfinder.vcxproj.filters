@@ -99,10 +99,10 @@
     <ClCompile Include="lib\imgui\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\SKRT\lib\FMOD\include\common_platform.cpp">
+    <ClCompile Include="common.cpp">
       <Filter>Source Files\FMOD</Filter>
     </ClCompile>
-    <ClCompile Include="..\SKRT\lib\FMOD\include\common.cpp">
+    <ClCompile Include="common_platform.cpp">
       <Filter>Source Files\FMOD</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,10 +185,10 @@
     <ClInclude Include="lib\imgui\imstb_truetype.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\SKRT\lib\FMOD\include\common.h">
+    <ClInclude Include="common.h">
       <Filter>Header Files\FMOD</Filter>
     </ClInclude>
-    <ClInclude Include="..\SKRT\lib\FMOD\include\common_platform.h">
+    <ClInclude Include="common_platform.h">
       <Filter>Header Files\FMOD</Filter>
     </ClInclude>
   </ItemGroup>
