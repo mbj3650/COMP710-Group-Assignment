@@ -7,11 +7,11 @@
 #include "scene.h"
 #include "game.h"
 #include "xboxcontroller.h"
-#include "lib/imgui/imgui.h"
-#include "lib/imgui/imgui_impl_sdl2.h"
 // Library includes:
 #include <cassert>
 #include <SDL.h>
+#include "lib/imgui/imgui.h"
+#include "lib/imgui/imgui_impl_sdl2.h"
 InputSystem::InputSystem()
 	: m_pCurrentKeyboardState(0)
 	, m_previousMouseButtons(0)
@@ -199,8 +199,7 @@ InputSystem::SetRelativeMode(bool relative)
 	}
 	m_bRelativeMouseMode = relative;
 }
-int
-InputSystem::GetNumberOfControllersAttached() const
+int InputSystem::GetNumberOfControllersAttached() const
 {
 	return m_iNumAttachedControllers;
 }

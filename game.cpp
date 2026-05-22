@@ -3,6 +3,7 @@
 #include "game.h"
 // Library includes:
 #include "renderer.h"
+#include "SceneGame.h"
 #include "logmanager.h"
 #include "sprite.h"
 #include <time.h>
@@ -37,7 +38,24 @@ Game::Game() : m_pRenderer(0), m_bLooping(true)
 }
 Game::~Game()
 {
-	
+	system->release();
+	std::cout << "SYSTEM DESTROYED!\n";
+	for (int i = 0; i < m_scenes.size(); i++) {
+		delete m_scenes.at(i);
+		m_scenes.at(i) = 0;
+	}
+	std::cout << "SCENES DESTROYED!\n";
+	m_pSounds.clear();
+	delete m_pInputSystem;
+	m_pInputSystem = 0;
+	std::cout << "INPUT SYSTEM DESTROYED!\n";
+	m_scenes.clear();
+
+	std::cout << "SOUND SYSTEM AND SCENES CLEARED!";
+
+	delete m_pRenderer;
+	m_pRenderer = 0;
+	std::cout << "RENDERER DELETED!\n";
 }
 void Game::Quit()
 {
@@ -63,11 +81,11 @@ bool Game::Initialise()
 
 	FMOD::Sound* newSound = nullptr;
 
-	int bbWidth = 1920;
-	int bbHeight = 1200;
+	int bbWidth = 1280;
+	int bbHeight = 720;
 	m_pRenderer = new Renderer();
 	m_pInputSystem = new InputSystem();
-	if (!m_pRenderer->Initialise(false, bbWidth, bbHeight))
+	if (!m_pRenderer->Initialise(true, bbWidth, bbHeight))
 	{
 		LogManager::GetInstance().Log("Renderer failed to initialise!");
 		return false;
@@ -79,6 +97,11 @@ bool Game::Initialise()
 	m_pRenderer->SetClearColour(0, 0, 0);
 
 	
+
+	Scene* pScene = 0;
+	pScene = new SceneGame();
+	pScene->Initialise(*m_pRenderer);
+	m_scenes.push_back(pScene);
 
 	//// Load static text textures into the Texture Manager...
 	//m_pRenderer->CreateStaticText("Auckland University of Technology", 50);
@@ -96,13 +119,16 @@ bool Game::DoGameLoop()
 {
 	const float stepSize = 1.0f / 60.0f;
 	// TODO: Process input here!
+	
 	m_pInputSystem->ProcessInput();
+	
 	if (m_bLooping)
 	{
 		Uint64 current = SDL_GetPerformanceCounter();
 		float deltaTime = (current - m_iLastTime) / static_cast<float>(SDL_GetPerformanceFrequency());
 		m_iLastTime = current;
 		m_fExecutionTime += deltaTime;
+
 		Process(deltaTime);
 
 #ifdef USE_LAG
@@ -116,9 +142,6 @@ bool Game::DoGameLoop()
 			++innerLag;
 		}
 #endif //USE_LAG
-		if (m_fExecutionTime > 6 && m_iCurrentScene == 0) {
-			m_iCurrentScene = 1;
-		}
 		
 		Draw(*m_pRenderer);
 	}
@@ -132,7 +155,6 @@ void Game::Process(float deltaTime)
 		deltaTime = 0.0f;
 	}
 	else {
-		m_pInputSystem->ProcessInput();
 		int result = m_pInputSystem->GetMouseButtonState(SDL_BUTTON_LEFT);
 		if (result == BS_PRESSED)
 		{
