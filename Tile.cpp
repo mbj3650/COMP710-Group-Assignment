@@ -67,7 +67,7 @@ void Tile::Undo() {//reset the address of the next tile
 void
 Tile::UpdateDraw() {//changes tile color based on its status
 	if (isEnd) {
-		m_pSprite->SetBlueTint(0);
+		m_pSprite->SetBlueTint(0); 
 		m_pSprite->SetGreenTint(0);
 	}
 	else if (isStart) {
