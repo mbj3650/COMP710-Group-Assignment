@@ -19,7 +19,12 @@ public:
 	void UpdateDraw();//manually called to update a tile to change its appearance 
 	void Draw(Renderer& renderer);
 	void setStart();//set as start
-	void setEnd();//set as end
+	void setEnd();
+	void setNext(Tile* NextPosition);
+	void setPath();
+	void setPrevious(Tile* PrevPosition);
+	void Undo();
+	//set as end
 protected:
 
 private:
@@ -34,8 +39,8 @@ public:
 	bool isStart;
 	bool isEnd;
 	int Connections;//if has more than 2 connections, something has gone wrong and we must not allow the player to continue as long as theres 3+ connections 
-	Vector2 PrevPosition;
-	Vector2 NextPosition;
+	Tile* PrevPosition;
+	Tile* NextPosition;
 protected:
 
 private:

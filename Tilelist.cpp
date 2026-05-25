@@ -49,6 +49,8 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 	}
 	GetTile(Startpos)->setStart();//set start
 	GetTile(Endpos)->setEnd();//set end
+
+	path.push_back(GetStart());//add as start node to list
 	return true;
 };
 
@@ -91,6 +93,25 @@ Tile* Tilelist::GetTile( int x,int y ) {
 	
 }
 
-Tile* Tilelist::GetStart() {
+Vector2 Tilelist::Undo() {
+	if (path.size() > 1) {//ONLY undo if path has more than 1 tile
+		path.pop_back();//remove last path added
+		path.at(path.size() - 1)->Undo();//remove end knowledge from new end path
+	}
+
+	return path.at(path.size() - 1)->Position;
+}
+
+bool Tilelist::isEnd(Vector2 Position) {//check if player has reached the end
+	if (Endpos.x == Position.x) {
+		if (Endpos.y == Position.y) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+Tile* Tilelist::GetStart() {//get start tile
 	return GetTile(Startpos);
 }
