@@ -22,6 +22,7 @@ public:
 	virtual bool Initialise(Renderer& renderer);
 	void Move(SDL_Scancode key);
 	virtual void Process(float deltaTime, InputSystem& inputSystem);
+	bool MovePosition(int xoffset, int yoffset);
 	virtual void Draw(Renderer& renderer);
 	virtual void DebugDraw();
 protected:
@@ -41,6 +42,7 @@ protected:
 	AnimatedSprite* m_pCentre;
 	float m_angle;
 	float m_rotationSpeed;
+	bool moving;
 private:
 };
 #endif // SCENEGAME_H

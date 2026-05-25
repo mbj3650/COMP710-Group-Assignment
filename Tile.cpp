@@ -47,6 +47,23 @@ void Tile::setEnd() {
 	isEnd = true;
 }
 
+void Tile::setNext(Tile* NextPosition) {//set the tile to a path and move to the next 
+	this->NextPosition = NextPosition;
+}
+
+void Tile::setPath() {
+	this->isPath = true;
+}
+
+void Tile::setPrevious(Tile* PrevPosition) {
+	this->PrevPosition = NextPosition;
+}
+
+void Tile::Undo() {//reset the address of the next tile
+	NextPosition->isPath = false;//remove path status from it
+	this->NextPosition = 0;
+}
+
 void
 Tile::UpdateDraw() {//changes tile color based on its status
 	if (isEnd) {
