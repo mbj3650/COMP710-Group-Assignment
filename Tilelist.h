@@ -20,9 +20,9 @@ public:
 	void setStart();//sets tile to be "start"
 	void setEnd();//sets tlie to be "end"
 	Tile* GetTile(Vector2 Pos);
-
 	Tile* GetTile(int x, int y);
-
+	Vector2 Undo();
+	bool isEnd(Vector2 Position);
 	Tile* GetStart();
 
 protected:
@@ -34,6 +34,7 @@ private:
 	// Member data:
 public:
 	std::vector<Tile*> tiles;
+	std::vector<Tile*> path;
 	Vector2 Startpos;
 	Vector2 Endpos;
 	int rows;

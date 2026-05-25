@@ -29,7 +29,7 @@ private:
 	// Member data:
 public:
 	Vector2 pos;
-	std::vector<Tile*> Path;
+
 protected:
 
 private:
