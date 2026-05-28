@@ -12,7 +12,8 @@ class AnimatedSprite;
 class Tile;
 class Pathmaker;
 class Tilelist;
-class Enemy;  // added for enemy wave stuff
+class Enemy;
+class DynamicText;  // for the HUD labels
 
 // Class declaration:
 class SceneGame : public Scene
@@ -47,11 +48,20 @@ protected:
 	bool moving;
 
 	// enemy / wave stuff
-	Renderer* m_pRenderer;          // need this to spawn enemies inside Process
+	Renderer* m_pRenderer;
 	std::vector<Enemy*> m_enemies;
-	float m_fSpawnTimer;            // counts up, spawn when it hits the interval
-	float m_fTileSize;              // pixel size of one tile, set in Initialise
-	int m_iLives;                   // player loses a life each time an enemy gets through
+	float m_fSpawnTimer;
+	float m_fTileSize;
+	int m_iLives;
+
+	// wave tracking
+	int m_iWave;              // which wave we're on
+	int m_iEnemiesToSpawn;    // how many left to spawn this wave
+	bool m_bWaveComplete;     // waiting between waves
+
+	// HUD text labels
+	DynamicText* m_pLivesText;
+	DynamicText* m_pWaveText;
 
 private:
 };

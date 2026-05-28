@@ -8,6 +8,7 @@
 #include "Pathmaker.h"
 #include "Tile.h"
 #include "Enemy.h"
+#include "DynamicText.h"
 // Library includes:
 #include <cassert>
 #include "lib/imgui/imgui.h"
@@ -15,6 +16,18 @@
 #include "inlinehelpers.h"
 #include "Tilelist.h"
 #include <iostream>
+#include <string>
+
+// each wave will spawn this many enemies per wave level
+// so wave 1 = 3 enemy, wave 2 = 6 enemy, and so on
+const int ENEMIES_PER_WAVE = 3;
+
+// how many second between each enemy spawn
+const float SPAWN_INTERVAL = 1.5f;
+
+// use windows system font because we dont have font file in assets folder
+// if not work, change to any ttf path on your computer
+const char* FONT_PATH = "C:\\Windows\\Fonts\\arial.ttf";
 
 SceneGame::SceneGame()
 	: m_pCentre(0)
@@ -24,7 +37,18 @@ SceneGame::SceneGame()
 	m_pRenderer = 0;
 	m_fSpawnTimer = 0.0f;
 	m_fTileSize = 40.0f;
+
+	// player start with 20 lives
 	m_iLives = 20;
+
+	// wave start from 1
+	m_iWave = 1;
+	m_iEnemiesToSpawn = ENEMIES_PER_WAVE;
+	m_bWaveComplete = false;
+
+	// set to null first, will create in Initialise
+	m_pLivesText = 0;
+	m_pWaveText = 0;
 }
 
 SceneGame::~SceneGame()
@@ -34,13 +58,20 @@ SceneGame::~SceneGame()
 	delete pathmaker;
 	m_pCentre = 0;
 
-	// clean up any enemies still on screen
+	// delete all enemy that still alive on screen
 	for (int i = 0; i < (int)m_enemies.size(); i++)
 	{
 		delete m_enemies[i];
 		m_enemies[i] = 0;
 	}
 	m_enemies.clear();
+
+	// also delete the HUD text object
+	delete m_pLivesText;
+	m_pLivesText = 0;
+
+	delete m_pWaveText;
+	m_pWaveText = 0;
 }
 
 bool SceneGame::Initialise(Renderer& renderer)
@@ -53,13 +84,25 @@ bool SceneGame::Initialise(Renderer& renderer)
 	moving = true;
 	columns = SCREEN_WIDTH / 40;
 	rows = SCREEN_HEIGHT / 40;
-	list->Initialise(renderer, rows, columns); // this holds all the tiles that the map needs, including start and end
-	pathmaker->Initialise(renderer, list->Startpos); // this guy tracks the position of where the "player" is in terms of grid
+	list->Initialise(renderer, rows, columns);
+	pathmaker->Initialise(renderer, list->Startpos);
 
-	// store renderer so we can spawn enemies later in Process
+	// save renderer pointer so we can use it later when spawn enemy inside Process
 	m_pRenderer = &renderer;
-	// work out the actual pixel width of a tile
 	m_fTileSize = (float)SCREEN_WIDTH / (float)columns;
+
+	// create the lives text, put it at top left corner of screen
+	// centered = false mean position is anchor to top left of the text
+	m_pLivesText = new DynamicText();
+	m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
+	m_pLivesText->SetPosition(16, 16);
+	m_pLivesText->SetText(renderer, "Lives: 20");
+
+	// wave text go just below the lives text
+	m_pWaveText = new DynamicText();
+	m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
+	m_pWaveText->SetPosition(16, 48);
+	m_pWaveText->SetText(renderer, "Wave: 1");
 
 	return true;
 }
@@ -67,14 +110,14 @@ bool SceneGame::Initialise(Renderer& renderer)
 void
 SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 {
-	list->Process(deltaTime); // process all tiles in lists in case they need updates or whatnot
+	list->Process(deltaTime);
 
 	if (moving)
 	{
-		// MOVEMENT FOR MAKING PATHS
-		if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) // CHECK IF KEY PRESSED
+		// player is still drawing the path, handle movement input
+		if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED)
 		{
-			std::cout << "w\n"; // DEBUG OUTPUT
+			std::cout << "w\n";
 			MovePosition(-1, 0);
 		}
 		else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED)
@@ -93,33 +136,35 @@ SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 			MovePosition(0, 1);
 		}
 
+		// B key for undo last step
 		if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED)
 		{
 			std::cout << "undo\n";
-			Vector2 pos = list->Undo(); // set pathmaker to previous position
-			// fixed: these were swapped before which caused the undo to jump to the wrong tile
+			Vector2 pos = list->Undo();
+			// bug fix: before this was x = pos.y and y = pos.x, it was wrong
 			pathmaker->pos.x = pos.x;
 			pathmaker->pos.y = pos.y;
 		}
 	}
 	else
 	{
-		// path is done, start spawning enemies
-		// each enemy follows the path using the tile linked list
-
+		// path drawing is finish, now run the enemy wave logic
 		m_fSpawnTimer += deltaTime;
 
-		// spawn a new enemy every 1.5 seconds
-		if (m_fSpawnTimer >= 1.5f && m_pRenderer != 0)
+		// if still have enemy to spawn this wave and timer is ready, spawn one
+		if (m_iEnemiesToSpawn > 0 && m_fSpawnTimer >= SPAWN_INTERVAL && m_pRenderer != 0)
 		{
 			m_fSpawnTimer = 0.0f;
 
 			Enemy* newEnemy = new Enemy();
 			newEnemy->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize);
 			m_enemies.push_back(newEnemy);
+
+			m_iEnemiesToSpawn--;
+			std::cout << "spawned enemy, " << m_iEnemiesToSpawn << " left this wave\n";
 		}
 
-		// update all enemies, delete any that have reached the end
+		// update all enemy, if enemy reach end then remove it and minus lives
 		for (int i = (int)m_enemies.size() - 1; i >= 0; i--)
 		{
 			m_enemies[i]->Process(deltaTime);
@@ -130,20 +175,34 @@ SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 				m_enemies.erase(m_enemies.begin() + i);
 				m_iLives--;
 				std::cout << "enemy got through! lives left: " << m_iLives << "\n";
-				// TODO: game over screen when lives hit 0
+
+				// refresh the lives text on screen with new number
+				m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
 			}
-			list->Process(deltaTime);//process all tiles in lists in case they need updates or whatnot
 		}
 
+		// check if current wave is finish
+		// wave is finish when no more enemy to spawn AND no enemy left on screen
+		if (m_iEnemiesToSpawn == 0 && m_enemies.empty())
+		{
+			m_iWave++;
+			m_iEnemiesToSpawn = m_iWave * ENEMIES_PER_WAVE;
+			m_fSpawnTimer = 0.0f;
+
+			std::cout << "wave " << m_iWave << " starting! enemies this wave: " << m_iEnemiesToSpawn << "\n";
+
+			// update wave number on screen
+			m_pWaveText->SetText(*m_pRenderer, "Wave: " + std::to_string(m_iWave));
+		}
 	}
 }
 
-bool SceneGame::MovePosition(int xoffset, int yoffset) // CHECKS IF GIVEN POSITION (WHEN OFFSET) IS VALID
+bool SceneGame::MovePosition(int xoffset, int yoffset)
 {
 	Vector2 position = pathmaker->pos;
 
-	// fixed: rows and columns were the wrong way around here
-	// x is the column direction so it should be bounded by columns, not rows
+	// check boundary, make sure player not go outside the grid
+	// bug fix: rows and columns was swap here before, cause player can walk off screen
 	if ((position.x + xoffset >= columns)
 	||  (position.x + xoffset < 0)
 	||  (position.y + yoffset < 0)
@@ -152,37 +211,50 @@ bool SceneGame::MovePosition(int xoffset, int yoffset) // CHECKS IF GIVEN POSITI
 		return false;
 	}
 
-	if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath) // check if not already a path
+	// also check if that tile is already part of path, cannot go back there
+	if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath)
 	{
 		return false;
 	}
 	else
 	{
-		Tile* CurrentTile = list->GetTile(pathmaker->pos); // get current tile
-		pathmaker->pos.x += xoffset; // MAKE MOVEMENT
+		// move is valid, update the tile link and mark as path
+		Tile* CurrentTile = list->GetTile(pathmaker->pos);
+		pathmaker->pos.x += xoffset;
 		pathmaker->pos.y += yoffset;
-		Tile* NextTile = list->GetTile(pathmaker->pos); // get tile player will go to
-		CurrentTile->setNext(NextTile); // set current tile's next tile to be the new position's tile
-		NextTile->setPrevious(CurrentTile); // set new tile's previous tile to be this one
+		Tile* NextTile = list->GetTile(pathmaker->pos);
+		CurrentTile->setNext(NextTile);
+		NextTile->setPrevious(CurrentTile);
 		NextTile->setPath();
 		list->path.push_back(NextTile);
+
+		// if player reach the end tile, stop movement
 		if (list->isEnd(pathmaker->pos))
 		{
 			moving = false;
 		}
+		return true;
 	}
-	
 }
 
 void
 SceneGame::Draw(Renderer& renderer)
 {
+	// draw tile grid first
 	list->Draw(renderer);
 
-	// draw enemies on top of the tiles
+	// draw enemy on top of tile
 	for (int i = 0; i < (int)m_enemies.size(); i++)
 	{
 		m_enemies[i]->Draw(renderer);
+	}
+
+	// draw HUD text last so it appear on top of everything
+	// only show after path is done and wave start
+	if (!moving)
+	{
+		m_pLivesText->Draw(renderer);
+		m_pWaveText->Draw(renderer);
 	}
 }
 
@@ -194,7 +266,9 @@ void SceneGame::DebugDraw()
 	ImGui::SliderInt("Start column", &y, 0, columns - 1, "%d");
 	list->GetTile(x, y)->isPath = true;
 
-	// show enemy/lives info in the debug window
+	// show game state info in debug window
 	ImGui::Text("Lives: %d", m_iLives);
-	ImGui::Text("Enemies active: %d", (int)m_enemies.size());
+	ImGui::Text("Wave: %d", m_iWave);
+	ImGui::Text("Enemies to spawn: %d", m_iEnemiesToSpawn);
+	ImGui::Text("Enemies on screen: %d", (int)m_enemies.size());
 }
