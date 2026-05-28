@@ -1,4 +1,9 @@
 // COMP710 GP Framework 2025
+// SceneGame.cpp
+// Modified by: MartinYan12138y
+// Changes: Added game over detection, game over screen (defeated_gameover.png),
+//          and full restart system that resets all game state.
+
 // This include:
 #include "SceneGame.h"
 // Local includes:
@@ -19,274 +24,409 @@
 #include <string>
 #include <box2d.h>
 
-// each wave will spawn this many enemies per wave level
+// Each wave will spawn this many enemies per wave level
 // so wave 1 = 3 enemy, wave 2 = 6 enemy, and so on
 const int ENEMIES_PER_WAVE = 3;
 
-// how many second between each enemy spawn
+// How many seconds between each enemy spawn
 const float SPAWN_INTERVAL = 1.5f;
 
-// use windows system font because we dont have font file in assets folder
-// if not work, change to any ttf path on your computer
+// Use Windows system font because we don't have a font file in assets folder
+// If this doesn't work, change to any TTF path on your computer
 const char* FONT_PATH = "C:\\Windows\\Fonts\\arial.ttf";
 
+// Path to the game over image -- make sure defeated_gameover.png is in your assets folder
+const char* GAMEOVER_IMAGE_PATH = "..\\assets\\defeated_gameover.png";
+
 SceneGame::SceneGame()
-	: m_pCentre(0)
-	, m_angle(0.0f)
-	, m_rotationSpeed(1.0f)
+    : m_pCentre(0)
+    , m_angle(0.0f)
+    , m_rotationSpeed(1.0f)
 {
-	m_pRenderer = 0;
-	m_fSpawnTimer = 0.0f;
-	m_fTileSize = 40.0f;
+    m_pRenderer = 0;
+    m_fSpawnTimer = 0.0f;
+    m_fTileSize = 40.0f;
 
-	// player start with 20 lives
-	m_iLives = 20;
+    // Player starts with 20 lives
+    m_iLives = 20;
 
-	// wave start from 1
-	m_iWave = 1;
-	m_iEnemiesToSpawn = ENEMIES_PER_WAVE;
-	m_bWaveComplete = false;
+    // Wave starts from 1
+    m_iWave = 1;
+    m_iEnemiesToSpawn = ENEMIES_PER_WAVE;
+    m_bWaveComplete = false;
 
-	// set to null first, will create in Initialise
-	m_pLivesText = 0;
-	m_pWaveText = 0;
+    // Set to null first, will create in Initialise
+    m_pLivesText  = 0;
+    m_pWaveText   = 0;
+
+    // Game over starts as false
+    m_bGameOver       = false;
+    m_pGameOverSprite = 0;
+    m_pRestartText    = 0;
 }
 
 SceneGame::~SceneGame()
 {
-	delete list;
-	delete m_pCentre;
-	delete pathmaker;
-	m_pCentre = 0;
+    delete list;
+    delete m_pCentre;
+    delete pathmaker;
+    m_pCentre = 0;
 
-	// delete all enemy that still alive on screen
-	for (int i = 0; i < (int)m_enemies.size(); i++)
-	{
-		delete m_enemies[i];
-		m_enemies[i] = 0;
-	}
-	m_enemies.clear();
+    // Delete all enemies still alive on screen
+    for (int i = 0; i < (int)m_enemies.size(); i++)
+    {
+        delete m_enemies[i];
+        m_enemies[i] = 0;
+    }
+    m_enemies.clear();
 
-	// also delete the HUD text object
-	delete m_pLivesText;
-	m_pLivesText = 0;
+    // Delete HUD text objects
+    delete m_pLivesText;
+    m_pLivesText = 0;
 
-	delete m_pWaveText;
-	m_pWaveText = 0;
-	//destroy the world
-	b2DestroyWorld(WorldPointer);
-	delete World;
-	std::cout << "WORLD DESTROYED\n";
+    delete m_pWaveText;
+    m_pWaveText = 0;
+
+    // Delete game over objects
+    delete m_pGameOverSprite;
+    m_pGameOverSprite = 0;
+
+    delete m_pRestartText;
+    m_pRestartText = 0;
+
+    // Destroy the Box2D world
+    b2DestroyWorld(WorldPointer);
+    delete World;
+    std::cout << "WORLD DESTROYED\n";
 }
 
 bool SceneGame::Initialise(Renderer& renderer)
 {
-	srand(time(NULL));
-	const int SCREEN_WIDTH = renderer.GetWidth();
-	const int SCREEN_HEIGHT = renderer.GetHeight();
+    srand(time(NULL));
+    const int SCREEN_WIDTH  = renderer.GetWidth();
+    const int SCREEN_HEIGHT = renderer.GetHeight();
 
-	//set up the world for box2d objects to exist in
-	World = new b2WorldDef();
-	*World = b2DefaultWorldDef();
-	WorldPointer = b2CreateWorld(World);
-	b2World_SetGravity(WorldPointer, { 0,0 });//we dont want these objects to fall to the ground, so make it have 0 gravity
-	ScenesubStepCount = 16;//check 16 times for collisions so we dont get objects that move fast phasing through eachother
-	
+    // Set up the Box2D world
+    World = new b2WorldDef();
+    *World = b2DefaultWorldDef();
+    WorldPointer = b2CreateWorld(World);
+    b2World_SetGravity(WorldPointer, { 0, 0 });
+    ScenesubStepCount = 16;
 
-	list = new Tilelist();
-	pathmaker = new Pathmaker();
-	moving = true;
-	columns = SCREEN_WIDTH / 40;
-	rows = SCREEN_HEIGHT / 40;
-	list->Initialise(renderer, rows, columns);
-	pathmaker->Initialise(renderer, list->Startpos);
+    list      = new Tilelist();
+    pathmaker = new Pathmaker();
+    moving    = true;
+    columns   = SCREEN_WIDTH  / 40;
+    rows      = SCREEN_HEIGHT / 40;
+    list->Initialise(renderer, rows, columns);
+    pathmaker->Initialise(renderer, list->Startpos);
 
-	// save renderer pointer so we can use it later when spawn enemy inside Process
-	m_pRenderer = &renderer;
-	m_fTileSize = (float)SCREEN_WIDTH / (float)columns;
+    // Save renderer pointer so we can use it later when spawning enemies
+    m_pRenderer = &renderer;
+    m_fTileSize = (float)SCREEN_WIDTH / (float)columns;
 
-	// create the lives text, put it at top left corner of screen
-	// centered = false mean position is anchor to top left of the text
-	m_pLivesText = new DynamicText();
-	m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
-	m_pLivesText->SetText(renderer, "Lives: 20");
-	m_pLivesText->SetPosition(16, 16);
+    // Create the lives text, anchored to the top-left corner
+    m_pLivesText = new DynamicText();
+    m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
+    m_pLivesText->SetText(renderer, "Lives: 20");
+    m_pLivesText->SetPosition(16, 16);
 
-	// wave text go just below the lives text
-	m_pWaveText = new DynamicText();
-	m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
-	m_pWaveText->SetText(renderer, "Wave: 1");
-	m_pWaveText->SetPosition(16, 48);
+    // Wave text goes just below the lives text
+    m_pWaveText = new DynamicText();
+    m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
+    m_pWaveText->SetText(renderer, "Wave: 1");
+    m_pWaveText->SetPosition(16, 48);
 
-	return true;
+    // --- Load the game over sprite ---
+    // The sprite is loaded here and scaled to fill the full screen.
+    // Make sure defeated_gameover.png is inside your assets folder.
+    m_pGameOverSprite = renderer.CreateSprite(GAMEOVER_IMAGE_PATH);
+    if (m_pGameOverSprite)
+    {
+        // Scale image to cover the whole screen
+        float scaleX = (float)SCREEN_WIDTH  / (float)m_pGameOverSprite->GetWidth();
+        float scaleY = (float)SCREEN_HEIGHT / (float)m_pGameOverSprite->GetHeight();
+
+        // Use the smaller scale so image fills without distortion,
+        // or just use scaleX if you want a full stretch
+        float scale = (scaleX < scaleY) ? scaleX : scaleY;
+        m_pGameOverSprite->SetScale(scale);
+
+        // Centre it on screen
+        m_pGameOverSprite->SetX(SCREEN_WIDTH  / 2);
+        m_pGameOverSprite->SetY(SCREEN_HEIGHT / 2);
+    }
+
+    // "Press R to restart" text shown on the game over screen
+    m_pRestartText = new DynamicText();
+    m_pRestartText->Initialise(renderer, FONT_PATH, 32, true);
+    m_pRestartText->SetText(renderer, "Press R to Restart");
+    m_pRestartText->SetPosition((float)(SCREEN_WIDTH / 2), (float)(SCREEN_HEIGHT - 80));
+
+    return true;
 }
 
-void
-SceneGame::Process(float deltaTime, InputSystem& inputSystem)
+void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 {
-	list->Process(deltaTime);
+    // -------------------------------------------------------
+    // GAME OVER STATE: only listen for restart key
+    // -------------------------------------------------------
+    if (m_bGameOver)
+    {
+        // Press R to restart the whole game
+        if (inputSystem.GetKeyState(SDL_SCANCODE_R) == BS_PRESSED)
+        {
+            RestartGame(*m_pRenderer);
+        }
+        return; // Skip all normal game logic while game over screen is showing
+    }
 
-	if (moving)
-	{
-		// player is still drawing the path, handle movement input
-		if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED)
-		{
-			std::cout << "w\n";
-			MovePosition(-1, 0);
-		}
-		else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED)
-		{
-			std::cout << "s\n";
-			MovePosition(1, 0);
-		}
-		else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED)
-		{
-			std::cout << "a\n";
-			MovePosition(0, -1);
-		}
-		else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED)
-		{
-			std::cout << "d\n";
-			MovePosition(0, 1);
-		}
+    // -------------------------------------------------------
+    // NORMAL GAME LOGIC
+    // -------------------------------------------------------
+    list->Process(deltaTime);
 
-		// B key for undo last step
-		if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED)
-		{
-			std::cout << "undo\n";
-			Vector2 pos = list->Undo();
-			// bug fix: before this was x = pos.y and y = pos.x, it was wrong
-			pathmaker->pos.x = pos.x;
-			pathmaker->pos.y = pos.y;
-		}
-	}
-	else
-	{
-		// path drawing is finish, now run the enemy wave logic
-		m_fSpawnTimer += deltaTime;
+    if (moving)
+    {
+        // Player is still drawing the path -- handle movement input
+        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED)
+        {
+            std::cout << "w\n";
+            MovePosition(-1, 0);
+        }
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED)
+        {
+            std::cout << "s\n";
+            MovePosition(1, 0);
+        }
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED)
+        {
+            std::cout << "a\n";
+            MovePosition(0, -1);
+        }
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED)
+        {
+            std::cout << "d\n";
+            MovePosition(0, 1);
+        }
 
-		
-		b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);//move the box2d world forward by deltatime, do NOT multiply any other box2d object/function with deltatime except this one
-		
-		
-		// if still have enemy to spawn this wave and timer is ready, spawn one
-		if (m_iEnemiesToSpawn > 0 && m_fSpawnTimer >= SPAWN_INTERVAL && m_pRenderer != 0)
-		{
-			m_fSpawnTimer = 0.0f;
+        // B key to undo the last step
+        if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED)
+        {
+            std::cout << "undo\n";
+            Vector2 pos = list->Undo();
+            pathmaker->pos.x = pos.x;
+            pathmaker->pos.y = pos.y;
+        }
+    }
+    else
+    {
+        // Path drawing is finished -- run the enemy wave logic
+        m_fSpawnTimer += deltaTime;
 
-			Enemy* newEnemy = new Enemy();
-			newEnemy->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize,WorldPointer);
-			m_enemies.push_back(newEnemy);
+        b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
-			m_iEnemiesToSpawn--;
-			std::cout << "spawned enemy, " << m_iEnemiesToSpawn << " left this wave\n";
-		}
+        // If there are still enemies to spawn and the timer is ready, spawn one
+        if (m_iEnemiesToSpawn > 0 && m_fSpawnTimer >= SPAWN_INTERVAL && m_pRenderer != 0)
+        {
+            m_fSpawnTimer = 0.0f;
 
-		// update all enemy, if enemy reach end then remove it and minus lives
-		for (int i = (int)m_enemies.size() - 1; i >= 0; i--)
-		{
-			m_enemies[i]->Process(deltaTime);
+            Enemy* newEnemy = new Enemy();
+            newEnemy->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer);
+            m_enemies.push_back(newEnemy);
 
-			if (m_enemies[i]->HasReachedEnd())
-			{
-				delete m_enemies[i];
-				m_enemies.erase(m_enemies.begin() + i);
-				m_iLives--;
-				std::cout << "enemy got through! lives left: " << m_iLives << "\n";
+            m_iEnemiesToSpawn--;
+            std::cout << "Spawned enemy, " << m_iEnemiesToSpawn << " left this wave\n";
+        }
 
-				// refresh the lives text on screen with new number
-				m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
-			}
-		}
+        // Update all enemies; if an enemy reaches the end, remove it and subtract a life
+        for (int i = (int)m_enemies.size() - 1; i >= 0; i--)
+        {
+            m_enemies[i]->Process(deltaTime);
 
-		// check if current wave is finish
-		// wave is finish when no more enemy to spawn AND no enemy left on screen
-		if (m_iEnemiesToSpawn == 0 && m_enemies.empty())
-		{
-			m_iWave++;
-			m_iEnemiesToSpawn = m_iWave * ENEMIES_PER_WAVE;
-			m_fSpawnTimer = 0.0f;
+            if (m_enemies[i]->HasReachedEnd())
+            {
+                delete m_enemies[i];
+                m_enemies.erase(m_enemies.begin() + i);
+                m_iLives--;
+                std::cout << "Enemy got through! Lives left: " << m_iLives << "\n";
 
-			std::cout << "wave " << m_iWave << " starting! enemies this wave: " << m_iEnemiesToSpawn << "\n";
+                // Update the lives display
+                m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
 
-			// update wave number on screen
-			m_pWaveText->SetText(*m_pRenderer, "Wave: " + std::to_string(m_iWave));
-		}
-	}
+                // Check if the player has run out of lives
+                if (m_iLives <= 0)
+                {
+                    m_bGameOver = true;
+                    std::cout << "GAME OVER\n";
+                    return; // Stop processing this frame immediately
+                }
+            }
+        }
+
+        // Check if the current wave is finished
+        // (no more enemies to spawn AND no enemies left on screen)
+        if (m_iEnemiesToSpawn == 0 && m_enemies.empty())
+        {
+            m_iWave++;
+            m_iEnemiesToSpawn = m_iWave * ENEMIES_PER_WAVE;
+            m_fSpawnTimer = 0.0f;
+
+            std::cout << "Wave " << m_iWave << " starting! Enemies this wave: " << m_iEnemiesToSpawn << "\n";
+            m_pWaveText->SetText(*m_pRenderer, "Wave: " + std::to_string(m_iWave));
+        }
+    }
 }
 
 bool SceneGame::MovePosition(int xoffset, int yoffset)
 {
-	Vector2 position = pathmaker->pos;
+    Vector2 position = pathmaker->pos;
 
-	// check boundary, make sure player not go outside the grid
-	// bug fix: rows and columns was swap here before, cause player can walk off screen
-	if ((position.x + xoffset >= rows)
-	||  (position.x + xoffset < 0)
-	||  (position.y + yoffset < 0)
-	||  (position.y + yoffset >= columns))
-	{
-		return false;
-	}
+    // Check boundary so the player can't walk off the grid
+    if ((position.x + xoffset >= rows)
+    ||  (position.x + xoffset < 0)
+    ||  (position.y + yoffset < 0)
+    ||  (position.y + yoffset >= columns))
+    {
+        return false;
+    }
 
-	// also check if that tile is already part of path, cannot go back there
-	if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath)
-	{
-		return false;
-	}
-	else
-	{
-		// move is valid, update the tile link and mark as path
-		Tile* CurrentTile = list->GetTile(pathmaker->pos);
-		pathmaker->pos.x += xoffset;
-		pathmaker->pos.y += yoffset;
-		Tile* NextTile = list->GetTile(pathmaker->pos);
-		CurrentTile->setNext(NextTile);
-		NextTile->setPrevious(CurrentTile);
-		NextTile->setPath();
-		list->path.push_back(NextTile);
+    // Also check if that tile is already part of the path
+    if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath)
+    {
+        return false;
+    }
+    else
+    {
+        // Move is valid: update the tile linked list and mark as path
+        Tile* CurrentTile = list->GetTile(pathmaker->pos);
+        pathmaker->pos.x += xoffset;
+        pathmaker->pos.y += yoffset;
+        Tile* NextTile = list->GetTile(pathmaker->pos);
+        CurrentTile->setNext(NextTile);
+        NextTile->setPrevious(CurrentTile);
+        NextTile->setPath();
+        list->path.push_back(NextTile);
 
-		// if player reach the end tile, stop movement
-		if (list->isEnd(pathmaker->pos))
-		{
-			moving = false;
-		}
-		return true;
-	}
+        // If the player reaches the end tile, stop movement
+        if (list->isEnd(pathmaker->pos))
+        {
+            moving = false;
+        }
+        return true;
+    }
 }
 
-void
-SceneGame::Draw(Renderer& renderer)
+void SceneGame::Draw(Renderer& renderer)
 {
-	// draw tile grid first
-	list->Draw(renderer);
+    // -------------------------------------------------------
+    // GAME OVER SCREEN: draw the image and restart prompt
+    // -------------------------------------------------------
+    if (m_bGameOver)
+    {
+        // Draw the game over image (fills screen)
+        if (m_pGameOverSprite)
+        {
+            m_pGameOverSprite->Draw(renderer);
+        }
 
-	// draw enemy on top of tile
-	for (int i = 0; i < (int)m_enemies.size(); i++)
-	{
-		m_enemies[i]->Draw(renderer);
-	}
+        // Draw "Press R to Restart" below the image
+        if (m_pRestartText)
+        {
+            m_pRestartText->Draw(renderer);
+        }
+        return;
+    }
 
-	// draw HUD text last so it appear on top of everything
-	// only show after path is done and wave start
-	if (!moving)
-	{
-		m_pLivesText->Draw(renderer);
-		m_pWaveText->Draw(renderer);
-	}
+    // -------------------------------------------------------
+    // NORMAL GAME DRAW
+    // -------------------------------------------------------
+
+    // Draw tile grid first
+    list->Draw(renderer);
+
+    // Draw enemies on top of tiles
+    for (int i = 0; i < (int)m_enemies.size(); i++)
+    {
+        m_enemies[i]->Draw(renderer);
+    }
+
+    // Draw HUD text last so it appears on top of everything
+    // Only show after path is drawn and waves have started
+    if (!moving)
+    {
+        m_pLivesText->Draw(renderer);
+        m_pWaveText->Draw(renderer);
+    }
 }
 
 void SceneGame::DebugDraw()
 {
-	ImGui::Text("Scene: Grid");
-	ImGui::InputFloat("Rotation speed", &m_rotationSpeed);
-	ImGui::SliderInt("Start row", &x, 0, rows - 1, "%d");
-	ImGui::SliderInt("Start column", &y, 0, columns - 1, "%d");
-	list->GetTile(x, y)->isPath = true;
+    ImGui::Text("Scene: Grid");
+    ImGui::InputFloat("Rotation speed", &m_rotationSpeed);
+    ImGui::SliderInt("Start row",    &x, 0, rows    - 1, "%d");
+    ImGui::SliderInt("Start column", &y, 0, columns - 1, "%d");
+    list->GetTile(x, y)->isPath = true;
 
-	// show game state info in debug window
-	ImGui::Text("Lives: %d", m_iLives);
-	ImGui::Text("Wave: %d", m_iWave);
-	ImGui::Text("Enemies to spawn: %d", m_iEnemiesToSpawn);
-	ImGui::Text("Enemies on screen: %d", (int)m_enemies.size());
+    // Show game state info in the debug window
+    ImGui::Text("Lives: %d",             m_iLives);
+    ImGui::Text("Wave: %d",              m_iWave);
+    ImGui::Text("Enemies to spawn: %d",  m_iEnemiesToSpawn);
+    ImGui::Text("Enemies on screen: %d", (int)m_enemies.size());
+    ImGui::Text("Game Over: %s",         m_bGameOver ? "YES" : "NO");
+
+    // Debug button to manually trigger game over (useful for testing)
+    if (ImGui::Button("Force Game Over"))
+    {
+        m_iLives   = 0;
+        m_bGameOver = true;
+    }
+}
+
+// -------------------------------------------------------
+// RestartGame: wipes all state and starts fresh
+// -------------------------------------------------------
+void SceneGame::RestartGame(Renderer& renderer)
+{
+    std::cout << "Restarting game...\n";
+
+    // --- Clear enemies ---
+    for (int i = 0; i < (int)m_enemies.size(); i++)
+    {
+        delete m_enemies[i];
+        m_enemies[i] = 0;
+    }
+    m_enemies.clear();
+
+    // --- Destroy old Box2D world and create a new one ---
+    b2DestroyWorld(WorldPointer);
+    delete World;
+    World = new b2WorldDef();
+    *World = b2DefaultWorldDef();
+    WorldPointer = b2CreateWorld(World);
+    b2World_SetGravity(WorldPointer, { 0, 0 });
+
+    // --- Reset tile grid and path ---
+    delete list;
+    list = new Tilelist();
+    list->Initialise(renderer, rows, columns);
+
+    delete pathmaker;
+    pathmaker = new Pathmaker();
+    pathmaker->Initialise(renderer, list->Startpos);
+
+    // --- Reset game state ---
+    m_iLives          = 20;
+    m_iWave           = 1;
+    m_iEnemiesToSpawn = ENEMIES_PER_WAVE;
+    m_bWaveComplete   = false;
+    m_fSpawnTimer     = 0.0f;
+    moving            = true;
+    m_bGameOver       = false;
+
+    // --- Refresh HUD text ---
+    m_pLivesText->SetText(renderer, "Lives: 20");
+    m_pWaveText->SetText(renderer,  "Wave: 1");
+
+    std::cout << "Game restarted.\n";
 }
