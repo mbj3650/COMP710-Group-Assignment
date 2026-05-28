@@ -1,19 +1,17 @@
 // COMP710 GP Framework 2025
 // SceneGame.h
 // Modified by: MartinYan12138y
-// Changes: Added game over state, restart system, game over screen,
-//          and FMOD background music + sound effects
+// Changes: Game over state + restart, FMOD audio, instructions overlay,
+//          particle burst effects, enemy HP integration.
 
 #ifndef __SCENEMAIN_H__
 #define __SCENEMAIN_H__
 
-// Parent include:
 #include "scene.h"
-
-// FMOD
 #include "fmod.hpp"
+#include "Particle.h"
+#include <vector>
 
-// Forward declarations:
 class Renderer;
 class Sprite;
 class Tilelist;
@@ -21,9 +19,14 @@ class Pathmaker;
 class Enemy;
 class DynamicText;
 
+// Number of instruction text lines shown at game start
+const int NUM_INSTRUCTION_LINES = 8;
+
+// Particle pool size
+const int PARTICLE_POOL_SIZE = 40;
+
 class SceneGame : public Scene
 {
-    // Member methods:
 public:
     SceneGame();
     virtual ~SceneGame();
@@ -34,32 +37,27 @@ public:
     virtual void DebugDraw();
 
     bool MovePosition(int xoffset, int yoffset);
-
-    // Resets the entire game state for a fresh start
     void RestartGame(Renderer& renderer);
 
-protected:
 private:
-    SceneGame(const SceneGame& sceneMain);
-    SceneGame& operator=(const SceneGame& sceneMain);
+    SceneGame(const SceneGame&);
+    SceneGame& operator=(const SceneGame&);
 
-    // Member data:
-public:
 protected:
-    Sprite* m_pCentre;
-    float   m_angle;
-    float   m_rotationSpeed;
+    Sprite*    m_pCentre;
+    float      m_angle;
+    float      m_rotationSpeed;
 
     Renderer*  m_pRenderer;
     Tilelist*  list;
     Pathmaker* pathmaker;
 
-    bool    moving;
-    int     columns;
-    int     rows;
-    int     x;
-    int     y;
-    float   m_fTileSize;
+    bool  moving;
+    int   columns;
+    int   rows;
+    int   x;
+    int   y;
+    float m_fTileSize;
 
     // Wave and lives
     int   m_iLives;
@@ -73,25 +71,30 @@ protected:
     DynamicText* m_pLivesText;
     DynamicText* m_pWaveText;
 
-    // Box2D world
+    // Box2D
     b2WorldId   WorldPointer;
     b2WorldDef* World;
     int         ScenesubStepCount;
 
     // --- Game Over ---
-    bool    m_bGameOver;
-    Sprite* m_pGameOverSprite;   // Displays defeated_gameover.png
-    DynamicText* m_pRestartText; // "Press R to restart" hint
+    bool         m_bGameOver;
+    Sprite*      m_pGameOverSprite;
+    DynamicText* m_pRestartText;
 
-    // --- FMOD Sound ---
-    // Put your audio files in the assets/ folder and name them as below.
-    // Supported formats: .mp3, .wav, .ogg
-    FMOD::Sound*   m_pMusicBG;         // assets/music_bg.mp3        -- loops while playing
-    FMOD::Sound*   m_pSoundGameOver;   // assets/sound_gameover.wav  -- plays once on death
-    FMOD::Sound*   m_pSoundWaveStart;  // assets/sound_wavestart.wav -- plays each new wave
-    FMOD::Channel* m_pMusicChannel;    // Handle on BG music so we can stop/restart it
+    // --- Instructions overlay ---
+    bool         m_bShowInstructions;
+    DynamicText* m_pInstructions[NUM_INSTRUCTION_LINES];
 
-private:
+    // --- FMOD ---
+    FMOD::Sound*   m_pMusicBG;
+    FMOD::Sound*   m_pSoundGameOver;
+    FMOD::Sound*   m_pSoundWaveStart;
+    FMOD::Channel* m_pMusicChannel;
+
+    // --- Particles ---
+    Sprite*   m_pParticleSprite;              // shared sprite (explosion.png)
+    Particle  m_particlePool[PARTICLE_POOL_SIZE];
+    void      SpawnBurst(float x, float y);   // activates a burst of particles
 };
 
 #endif // __SCENEMAIN_H__

@@ -1,12 +1,10 @@
 // COMP710 GP Framework 2025
 // SceneGame.cpp
 // Modified by: MartinYan12138y
-// Changes: Added game over detection, game over screen (defeated_gameover.png),
-//          full restart system, and FMOD background music + sound effects.
+// Changes: Game over screen, restart system, FMOD audio,
+//          instructions overlay, particle burst effects, enemy HP integration.
 
-// This include:
 #include "SceneGame.h"
-// Local includes:
 #include "renderer.h"
 #include "sprite.h"
 #include "AnimatedSprite.h"
@@ -15,67 +13,69 @@
 #include "Enemy.h"
 #include "DynamicText.h"
 #include "game.h"
-// Library includes:
 #include <cassert>
 #include "lib/imgui/imgui.h"
 #include <time.h>
+#include <cstdlib>
+#include <cmath>
 #include "inlinehelpers.h"
 #include "Tilelist.h"
 #include <iostream>
 #include <string>
 #include <box2d.h>
 
-// Each wave spawns this many enemies per wave level
-// wave 1 = 3 enemies, wave 2 = 6 enemies, and so on
-const int ENEMIES_PER_WAVE = 3;
+const int   ENEMIES_PER_WAVE    = 3;
+const float SPAWN_INTERVAL      = 1.5f;
+const char* FONT_PATH           = "C:\\Windows\\Fonts\\arial.ttf";
+const char* GAMEOVER_IMAGE_PATH = "..\\assets\\defeated_gameover.png";
+const char* MUSIC_BG_PATH       = "..\\assets\\music_bg.mp3";
+const char* SOUND_GAMEOVER_PATH = "..\\assets\\sound_gameover.wav";
+const char* SOUND_WAVESTART_PATH= "..\\assets\\sound_wavestart.wav";
+const char* EXPLOSION_PATH      = "..\\assets\\explosion.png";
 
-// Seconds between each enemy spawn
-const float SPAWN_INTERVAL = 1.5f;
-
-// Windows system font for HUD text
-const char* FONT_PATH = "C:\\Windows\\Fonts\\arial.ttf";
-
-// -------------------------------------------------------
-// Asset paths -- place these files in your assets/ folder
-// -------------------------------------------------------
-const char* GAMEOVER_IMAGE_PATH  = "..\\assets\\defeated_gameover.png";
-const char* MUSIC_BG_PATH        = "..\\assets\\music_bg.mp3";
-const char* SOUND_GAMEOVER_PATH  = "..\\assets\\sound_gameover.wav";
-const char* SOUND_WAVESTART_PATH = "..\\assets\\sound_wavestart.wav";
+// Text shown in the instructions overlay (one string per line)
+const char* INSTRUCTION_LINES[NUM_INSTRUCTION_LINES] = {
+    "--- PATHSEEKER ---",
+    "",
+    "Draw a path from the START tile to the END tile",
+    "W / S    Move cursor up / down",
+    "A / D    Move cursor left / right",
+    "B        Undo last step",
+    "ESC      Quit",
+    "SPACE    Start game"
+};
 
 SceneGame::SceneGame()
-    : m_pCentre(0)
-    , m_angle(0.0f)
-    , m_rotationSpeed(1.0f)
+    : m_pCentre(0), m_angle(0.0f), m_rotationSpeed(1.0f)
 {
-    m_pRenderer       = 0;
-    m_fSpawnTimer     = 0.0f;
-    m_fTileSize       = 40.0f;
+    m_pRenderer        = 0;
+    m_fSpawnTimer      = 0.0f;
+    m_fTileSize        = 40.0f;
+    m_iLives           = 20;
+    m_iWave            = 1;
+    m_iEnemiesToSpawn  = ENEMIES_PER_WAVE;
+    m_bWaveComplete    = false;
+    m_pLivesText       = 0;
+    m_pWaveText        = 0;
+    m_bGameOver        = false;
+    m_pGameOverSprite  = 0;
+    m_pRestartText     = 0;
+    m_bShowInstructions= true;
+    m_pMusicBG         = 0;
+    m_pSoundGameOver   = 0;
+    m_pSoundWaveStart  = 0;
+    m_pMusicChannel    = 0;
+    m_pParticleSprite  = 0;
 
-    m_iLives          = 20;
-    m_iWave           = 1;
-    m_iEnemiesToSpawn = ENEMIES_PER_WAVE;
-    m_bWaveComplete   = false;
-
-    m_pLivesText      = 0;
-    m_pWaveText       = 0;
-
-    m_bGameOver       = false;
-    m_pGameOverSprite = 0;
-    m_pRestartText    = 0;
-
-    // Sound pointers start null; loaded in Initialise
-    m_pMusicBG        = 0;
-    m_pSoundGameOver  = 0;
-    m_pSoundWaveStart = 0;
-    m_pMusicChannel   = 0;
+    for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
+        m_pInstructions[i] = 0;
 }
 
 SceneGame::~SceneGame()
 {
     delete list;
-    delete m_pCentre;
     delete pathmaker;
+    delete m_pCentre;
     m_pCentre = 0;
 
     for (int i = 0; i < (int)m_enemies.size(); i++)
@@ -85,20 +85,18 @@ SceneGame::~SceneGame()
     }
     m_enemies.clear();
 
-    delete m_pLivesText;
-    m_pLivesText = 0;
+    delete m_pLivesText;   m_pLivesText   = 0;
+    delete m_pWaveText;    m_pWaveText    = 0;
+    delete m_pGameOverSprite; m_pGameOverSprite = 0;
+    delete m_pRestartText; m_pRestartText = 0;
+    delete m_pParticleSprite; m_pParticleSprite = 0;
 
-    delete m_pWaveText;
-    m_pWaveText = 0;
+    for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
+    {
+        delete m_pInstructions[i];
+        m_pInstructions[i] = 0;
+    }
 
-    delete m_pGameOverSprite;
-    m_pGameOverSprite = 0;
-
-    delete m_pRestartText;
-    m_pRestartText = 0;
-
-    // Release FMOD sound objects
-    // The FMOD::System itself is owned by Game and released there
     if (m_pMusicBG)        { m_pMusicBG->release();        m_pMusicBG        = 0; }
     if (m_pSoundGameOver)  { m_pSoundGameOver->release();  m_pSoundGameOver  = 0; }
     if (m_pSoundWaveStart) { m_pSoundWaveStart->release(); m_pSoundWaveStart = 0; }
@@ -111,10 +109,10 @@ SceneGame::~SceneGame()
 bool SceneGame::Initialise(Renderer& renderer)
 {
     srand(time(NULL));
-    const int SCREEN_WIDTH  = renderer.GetWidth();
-    const int SCREEN_HEIGHT = renderer.GetHeight();
+    const int W = renderer.GetWidth();
+    const int H = renderer.GetHeight();
 
-    // Box2D setup
+    // Box2D
     World = new b2WorldDef();
     *World = b2DefaultWorldDef();
     WorldPointer = b2CreateWorld(World);
@@ -124,15 +122,15 @@ bool SceneGame::Initialise(Renderer& renderer)
     list      = new Tilelist();
     pathmaker = new Pathmaker();
     moving    = true;
-    columns   = SCREEN_WIDTH  / 40;
-    rows      = SCREEN_HEIGHT / 40;
+    columns   = W / 40;
+    rows      = H / 40;
     list->Initialise(renderer, rows, columns);
     pathmaker->Initialise(renderer, list->Startpos);
 
     m_pRenderer = &renderer;
-    m_fTileSize = (float)SCREEN_WIDTH / (float)columns;
+    m_fTileSize = (float)W / (float)columns;
 
-    // HUD text
+    // HUD
     m_pLivesText = new DynamicText();
     m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
     m_pLivesText->SetText(renderer, "Lives: 20");
@@ -147,57 +145,97 @@ bool SceneGame::Initialise(Renderer& renderer)
     m_pGameOverSprite = renderer.CreateSprite(GAMEOVER_IMAGE_PATH);
     if (m_pGameOverSprite)
     {
-        float scaleX = (float)SCREEN_WIDTH  / (float)m_pGameOverSprite->GetWidth();
-        float scaleY = (float)SCREEN_HEIGHT / (float)m_pGameOverSprite->GetHeight();
-        float scale  = (scaleX < scaleY) ? scaleX : scaleY;
-        m_pGameOverSprite->SetScale(scale);
-        m_pGameOverSprite->SetX(SCREEN_WIDTH  / 2);
-        m_pGameOverSprite->SetY(SCREEN_HEIGHT / 2);
+        float sx = (float)W / m_pGameOverSprite->GetWidth();
+        float sy = (float)H / m_pGameOverSprite->GetHeight();
+        m_pGameOverSprite->SetScale(sx < sy ? sx : sy);
+        m_pGameOverSprite->SetX(W / 2);
+        m_pGameOverSprite->SetY(H / 2);
     }
 
-    // "Press R to Restart" prompt
     m_pRestartText = new DynamicText();
     m_pRestartText->Initialise(renderer, FONT_PATH, 32, true);
     m_pRestartText->SetText(renderer, "Press R to Restart");
-    m_pRestartText->SetPosition((float)(SCREEN_WIDTH / 2), (float)(SCREEN_HEIGHT - 80));
+    m_pRestartText->SetPosition((float)(W / 2), (float)(H - 80));
 
-    // -------------------------------------------------------
-    // FMOD: load sounds
-    // Get the FMOD system from Game so we share the same instance
-    // -------------------------------------------------------
-    FMOD::System* fmodSystem = Game::GetInstance().GetSoundSystem();
-
-    if (fmodSystem)
+    // Instructions overlay -- lines spaced 40px apart, centred on screen
+    int startY = H / 2 - (NUM_INSTRUCTION_LINES * 40) / 2;
+    for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
     {
-        // Background music: loops continuously
-        fmodSystem->createSound(MUSIC_BG_PATH, FMOD_LOOP_NORMAL | FMOD_CREATESTREAM, 0, &m_pMusicBG);
+        m_pInstructions[i] = new DynamicText();
+        m_pInstructions[i]->Initialise(renderer, FONT_PATH, 24, true);
+        // Use a placeholder space for blank lines so DynamicText doesn't fail
+        const char* text = (INSTRUCTION_LINES[i][0] == '\0') ? " " : INSTRUCTION_LINES[i];
+        m_pInstructions[i]->SetText(renderer, text);
+        m_pInstructions[i]->SetPosition((float)(W / 2), (float)(startY + i * 40));
+    }
 
-        // Game over sting: plays once
-        fmodSystem->createSound(SOUND_GAMEOVER_PATH, FMOD_DEFAULT, 0, &m_pSoundGameOver);
-
-        // Wave start jingle: plays once per wave
-        fmodSystem->createSound(SOUND_WAVESTART_PATH, FMOD_DEFAULT, 0, &m_pSoundWaveStart);
-
-        // Start background music immediately, keep channel reference so we can stop it later
-        if (m_pMusicBG)
+    // Particles -- pre-initialise pool with shared explosion sprite
+    m_pParticleSprite = renderer.CreateSprite(EXPLOSION_PATH);
+    if (m_pParticleSprite)
+    {
+        m_pParticleSprite->SetScale(0.3f);
+        for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
         {
-            fmodSystem->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
-            std::cout << "Background music started\n";
+            m_particlePool[i].Initialise(*m_pParticleSprite);
         }
     }
-    else
+
+    // FMOD
+    FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
+    if (fmod)
     {
-        std::cout << "Warning: FMOD system not available, sounds will not play\n";
+        fmod->createSound(MUSIC_BG_PATH,        FMOD_LOOP_NORMAL | FMOD_CREATESTREAM, 0, &m_pMusicBG);
+        fmod->createSound(SOUND_GAMEOVER_PATH,  FMOD_DEFAULT, 0, &m_pSoundGameOver);
+        fmod->createSound(SOUND_WAVESTART_PATH, FMOD_DEFAULT, 0, &m_pSoundWaveStart);
+        if (m_pMusicBG) fmod->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
     }
 
     return true;
 }
 
+// -------------------------------------------------------
+// SpawnBurst: activates a burst of particles at (x, y)
+// -------------------------------------------------------
+void SceneGame::SpawnBurst(float x, float y)
+{
+    if (!m_pParticleSprite) return;
+
+    int spawned = 0;
+    for (int i = 0; i < PARTICLE_POOL_SIZE && spawned < 8; i++)
+    {
+        if (!m_particlePool[i].m_bAlive)
+        {
+            // Random outward direction
+            float angle = ((float)rand() / RAND_MAX) * 6.2832f; // 0 to 2pi
+            float speed = 60.0f + ((float)rand() / RAND_MAX) * 80.0f;
+
+            m_particlePool[i].m_bAlive       = true;
+            m_particlePool[i].m_fCurrentAge  = 0.0f;
+            m_particlePool[i].m_fMaxLifespan = 0.5f + ((float)rand() / RAND_MAX) * 0.3f;
+            m_particlePool[i].m_postion      = { x, y };
+            m_particlePool[i].m_velocity     = { cosf(angle) * speed, sinf(angle) * speed };
+            m_particlePool[i].m_acceleration = { 0.0f, 40.0f }; // slight gravity
+            m_particlePool[i].m_fColour[0]   = 1.0f;            // red-orange tint
+            m_particlePool[i].m_fColour[1]   = 0.5f;
+            m_particlePool[i].m_fColour[2]   = 0.0f;
+            spawned++;
+        }
+    }
+}
+
 void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 {
-    // -------------------------------------------------------
-    // GAME OVER STATE: only listen for restart key
-    // -------------------------------------------------------
+    // --- Instructions overlay ---
+    if (m_bShowInstructions)
+    {
+        if (inputSystem.GetKeyState(SDL_SCANCODE_SPACE) == BS_PRESSED)
+        {
+            m_bShowInstructions = false;
+        }
+        return; // hold everything until instructions are dismissed
+    }
+
+    // --- Game over ---
     if (m_bGameOver)
     {
         if (inputSystem.GetKeyState(SDL_SCANCODE_R) == BS_PRESSED)
@@ -207,37 +245,25 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         return;
     }
 
-    // -------------------------------------------------------
-    // NORMAL GAME LOGIC
-    // -------------------------------------------------------
+    // --- Particles ---
+    for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
+    {
+        if (m_particlePool[i].m_bAlive)
+            m_particlePool[i].Process(deltaTime);
+    }
+
+    // --- Normal game ---
     list->Process(deltaTime);
 
     if (moving)
     {
-        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED)
-        {
-            std::cout << "w\n";
-            MovePosition(-1, 0);
-        }
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED)
-        {
-            std::cout << "s\n";
-            MovePosition(1, 0);
-        }
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED)
-        {
-            std::cout << "a\n";
-            MovePosition(0, -1);
-        }
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED)
-        {
-            std::cout << "d\n";
-            MovePosition(0, 1);
-        }
+        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) MovePosition(-1,  0);
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED) MovePosition( 1,  0);
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED) MovePosition( 0, -1);
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED) MovePosition( 0,  1);
 
         if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED)
         {
-            std::cout << "undo\n";
             Vector2 pos = list->Undo();
             pathmaker->pos.x = pos.x;
             pathmaker->pos.y = pos.y;
@@ -246,71 +272,61 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     else
     {
         m_fSpawnTimer += deltaTime;
-
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
-        if (m_iEnemiesToSpawn > 0 && m_fSpawnTimer >= SPAWN_INTERVAL && m_pRenderer != 0)
+        if (m_iEnemiesToSpawn > 0 && m_fSpawnTimer >= SPAWN_INTERVAL && m_pRenderer)
         {
             m_fSpawnTimer = 0.0f;
-
-            Enemy* newEnemy = new Enemy();
-            newEnemy->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer);
-            m_enemies.push_back(newEnemy);
-
+            Enemy* e = new Enemy();
+            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave);
+            m_enemies.push_back(e);
             m_iEnemiesToSpawn--;
-            std::cout << "Spawned enemy, " << m_iEnemiesToSpawn << " left this wave\n";
         }
 
         for (int i = (int)m_enemies.size() - 1; i >= 0; i--)
         {
             m_enemies[i]->Process(deltaTime);
 
+            // Enemy killed by a tower (HP reached 0)
+            if (m_enemies[i]->IsDead())
+            {
+                SpawnBurst(m_enemies[i]->GetX(), m_enemies[i]->GetY());
+                delete m_enemies[i];
+                m_enemies.erase(m_enemies.begin() + i);
+                continue;
+            }
+
+            // Enemy reached the end -- lose a life
             if (m_enemies[i]->HasReachedEnd())
             {
+                SpawnBurst(m_enemies[i]->GetX(), m_enemies[i]->GetY());
                 delete m_enemies[i];
                 m_enemies.erase(m_enemies.begin() + i);
                 m_iLives--;
-                std::cout << "Enemy got through! Lives left: " << m_iLives << "\n";
-
                 m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
 
                 if (m_iLives <= 0)
                 {
                     m_bGameOver = true;
                     std::cout << "GAME OVER\n";
-
-                    // Stop background music and play the game over sound
-                    if (m_pMusicChannel)
-                    {
-                        m_pMusicChannel->stop();
-                        m_pMusicChannel = 0;
-                    }
-                    FMOD::System* fmodSystem = Game::GetInstance().GetSoundSystem();
-                    if (fmodSystem && m_pSoundGameOver)
-                    {
-                        fmodSystem->playSound(m_pSoundGameOver, 0, false, 0);
-                    }
+                    if (m_pMusicChannel) { m_pMusicChannel->stop(); m_pMusicChannel = 0; }
+                    FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
+                    if (fmod && m_pSoundGameOver) fmod->playSound(m_pSoundGameOver, 0, false, 0);
                     return;
                 }
             }
         }
 
-        // Wave complete: start the next wave
         if (m_iEnemiesToSpawn == 0 && m_enemies.empty())
         {
             m_iWave++;
             m_iEnemiesToSpawn = m_iWave * ENEMIES_PER_WAVE;
-            m_fSpawnTimer     = 0.0f;
-
-            std::cout << "Wave " << m_iWave << " starting! Enemies: " << m_iEnemiesToSpawn << "\n";
+            m_fSpawnTimer = 0.0f;
             m_pWaveText->SetText(*m_pRenderer, "Wave: " + std::to_string(m_iWave));
+            std::cout << "Wave " << m_iWave << " starting!\n";
 
-            // Play the wave start sound
-            FMOD::System* fmodSystem = Game::GetInstance().GetSoundSystem();
-            if (fmodSystem && m_pSoundWaveStart)
-            {
-                fmodSystem->playSound(m_pSoundWaveStart, 0, false, 0);
-            }
+            FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
+            if (fmod && m_pSoundWaveStart) fmod->playSound(m_pSoundWaveStart, 0, false, 0);
         }
     }
 }
@@ -319,64 +335,56 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 {
     Vector2 position = pathmaker->pos;
 
-    if ((position.x + xoffset >= rows)
-    ||  (position.x + xoffset < 0)
-    ||  (position.y + yoffset < 0)
-    ||  (position.y + yoffset >= columns))
-    {
+    if ((position.x + xoffset >= rows) || (position.x + xoffset < 0)
+    ||  (position.y + yoffset < 0)     || (position.y + yoffset >= columns))
         return false;
-    }
 
     if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath)
-    {
         return false;
-    }
-    else
-    {
-        Tile* CurrentTile = list->GetTile(pathmaker->pos);
-        pathmaker->pos.x += xoffset;
-        pathmaker->pos.y += yoffset;
-        Tile* NextTile = list->GetTile(pathmaker->pos);
-        CurrentTile->setNext(NextTile);
-        NextTile->setPrevious(CurrentTile);
-        NextTile->setPath();
-        list->path.push_back(NextTile);
 
-        if (list->isEnd(pathmaker->pos))
-        {
-            moving = false;
-        }
-        return true;
-    }
+    Tile* cur  = list->GetTile(pathmaker->pos);
+    pathmaker->pos.x += xoffset;
+    pathmaker->pos.y += yoffset;
+    Tile* next = list->GetTile(pathmaker->pos);
+    cur->setNext(next);
+    next->setPrevious(cur);
+    next->setPath();
+    list->path.push_back(next);
+
+    if (list->isEnd(pathmaker->pos)) moving = false;
+    return true;
 }
 
 void SceneGame::Draw(Renderer& renderer)
 {
-    // -------------------------------------------------------
-    // GAME OVER SCREEN
-    // -------------------------------------------------------
-    if (m_bGameOver)
+    // Instructions overlay
+    if (m_bShowInstructions)
     {
-        if (m_pGameOverSprite)
+        list->Draw(renderer); // show the grid behind the text
+        for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
         {
-            m_pGameOverSprite->Draw(renderer);
-        }
-        if (m_pRestartText)
-        {
-            m_pRestartText->Draw(renderer);
+            if (m_pInstructions[i]) m_pInstructions[i]->Draw(renderer);
         }
         return;
     }
 
-    // -------------------------------------------------------
-    // NORMAL GAME DRAW
-    // -------------------------------------------------------
+    // Game over screen
+    if (m_bGameOver)
+    {
+        if (m_pGameOverSprite) m_pGameOverSprite->Draw(renderer);
+        if (m_pRestartText)    m_pRestartText->Draw(renderer);
+        return;
+    }
+
+    // Normal game
     list->Draw(renderer);
 
     for (int i = 0; i < (int)m_enemies.size(); i++)
-    {
         m_enemies[i]->Draw(renderer);
-    }
+
+    // Particles drawn on top of enemies
+    for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
+        if (m_particlePool[i].m_bAlive) m_particlePool[i].Draw(renderer);
 
     if (!moving)
     {
@@ -398,36 +406,32 @@ void SceneGame::DebugDraw()
     ImGui::Text("Enemies to spawn: %d",  m_iEnemiesToSpawn);
     ImGui::Text("Enemies on screen: %d", (int)m_enemies.size());
     ImGui::Text("Game Over: %s",         m_bGameOver ? "YES" : "NO");
+    ImGui::Text("Instructions: %s",      m_bShowInstructions ? "ON" : "OFF");
 
     if (ImGui::Button("Force Game Over"))
     {
-        m_iLives    = 0;
-        m_bGameOver = true;
+        m_iLives = 0; m_bGameOver = true;
         if (m_pMusicChannel) { m_pMusicChannel->stop(); m_pMusicChannel = 0; }
-        FMOD::System* fmodSystem = Game::GetInstance().GetSoundSystem();
-        if (fmodSystem && m_pSoundGameOver)
-        {
-            fmodSystem->playSound(m_pSoundGameOver, 0, false, 0);
-        }
+        FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
+        if (fmod && m_pSoundGameOver) fmod->playSound(m_pSoundGameOver, 0, false, 0);
+    }
+    if (ImGui::Button("Skip Instructions"))
+    {
+        m_bShowInstructions = false;
+    }
+    if (ImGui::Button("Test Particles"))
+    {
+        SpawnBurst(640.0f, 360.0f);
     }
 }
 
-// -------------------------------------------------------
-// RestartGame: wipes all state and starts fresh
-// -------------------------------------------------------
 void SceneGame::RestartGame(Renderer& renderer)
 {
-    std::cout << "Restarting game...\n";
+    std::cout << "Restarting...\n";
 
-    // Clear enemies
-    for (int i = 0; i < (int)m_enemies.size(); i++)
-    {
-        delete m_enemies[i];
-        m_enemies[i] = 0;
-    }
+    for (int i = 0; i < (int)m_enemies.size(); i++) { delete m_enemies[i]; m_enemies[i] = 0; }
     m_enemies.clear();
 
-    // Rebuild Box2D world
     b2DestroyWorld(WorldPointer);
     delete World;
     World = new b2WorldDef();
@@ -435,34 +439,26 @@ void SceneGame::RestartGame(Renderer& renderer)
     WorldPointer = b2CreateWorld(World);
     b2World_SetGravity(WorldPointer, { 0, 0 });
 
-    // Rebuild tile grid and path
-    delete list;
-    list = new Tilelist();
-    list->Initialise(renderer, rows, columns);
+    delete list;    list    = new Tilelist();  list->Initialise(renderer, rows, columns);
+    delete pathmaker; pathmaker = new Pathmaker(); pathmaker->Initialise(renderer, list->Startpos);
 
-    delete pathmaker;
-    pathmaker = new Pathmaker();
-    pathmaker->Initialise(renderer, list->Startpos);
-
-    // Reset game state
-    m_iLives          = 20;
-    m_iWave           = 1;
-    m_iEnemiesToSpawn = ENEMIES_PER_WAVE;
-    m_bWaveComplete   = false;
-    m_fSpawnTimer     = 0.0f;
-    moving            = true;
-    m_bGameOver       = false;
+    m_iLives           = 20;
+    m_iWave            = 1;
+    m_iEnemiesToSpawn  = ENEMIES_PER_WAVE;
+    m_bWaveComplete    = false;
+    m_fSpawnTimer      = 0.0f;
+    moving             = true;
+    m_bGameOver        = false;
+    m_bShowInstructions= true; // show instructions again on restart
 
     m_pLivesText->SetText(renderer, "Lives: 20");
     m_pWaveText->SetText(renderer,  "Wave: 1");
 
-    // Restart background music
-    FMOD::System* fmodSystem = Game::GetInstance().GetSoundSystem();
-    if (fmodSystem && m_pMusicBG)
-    {
-        fmodSystem->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
-        std::cout << "Background music restarted\n";
-    }
+    // Kill all particles
+    for (int i = 0; i < PARTICLE_POOL_SIZE; i++) m_particlePool[i].m_bAlive = false;
+
+    FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
+    if (fmod && m_pMusicBG) fmod->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
 
     std::cout << "Game restarted.\n";
 }
