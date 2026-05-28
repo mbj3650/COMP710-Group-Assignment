@@ -1,13 +1,17 @@
 // COMP710 GP Framework 2025
 // SceneGame.h
 // Modified by: MartinYan12138y
-// Changes: Added game over state, restart system, and game over screen
+// Changes: Added game over state, restart system, game over screen,
+//          and FMOD background music + sound effects
 
 #ifndef __SCENEMAIN_H__
 #define __SCENEMAIN_H__
 
 // Parent include:
 #include "scene.h"
+
+// FMOD
+#include "fmod.hpp"
 
 // Forward declarations:
 class Renderer;
@@ -43,8 +47,8 @@ private:
 public:
 protected:
     Sprite* m_pCentre;
-    float m_angle;
-    float m_rotationSpeed;
+    float   m_angle;
+    float   m_rotationSpeed;
 
     Renderer*  m_pRenderer;
     Tilelist*  list;
@@ -70,14 +74,22 @@ protected:
     DynamicText* m_pWaveText;
 
     // Box2D world
-    b2WorldId    WorldPointer;
-    b2WorldDef*  World;
-    int          ScenesubStepCount;
+    b2WorldId   WorldPointer;
+    b2WorldDef* World;
+    int         ScenesubStepCount;
 
     // --- Game Over ---
     bool    m_bGameOver;
     Sprite* m_pGameOverSprite;   // Displays defeated_gameover.png
     DynamicText* m_pRestartText; // "Press R to restart" hint
+
+    // --- FMOD Sound ---
+    // Put your audio files in the assets/ folder and name them as below.
+    // Supported formats: .mp3, .wav, .ogg
+    FMOD::Sound*   m_pMusicBG;         // assets/music_bg.mp3        -- loops while playing
+    FMOD::Sound*   m_pSoundGameOver;   // assets/sound_gameover.wav  -- plays once on death
+    FMOD::Sound*   m_pSoundWaveStart;  // assets/sound_wavestart.wav -- plays each new wave
+    FMOD::Channel* m_pMusicChannel;    // Handle on BG music so we can stop/restart it
 
 private:
 };
