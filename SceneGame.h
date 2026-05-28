@@ -4,7 +4,7 @@
 // Local includes:
 #include "scene.h"
 #include <vector>
-
+#include "box2d.h"
 // Forward declarations:
 class Renderer;
 class Sprite;
@@ -13,6 +13,8 @@ class Tile;
 class Pathmaker;
 class Tilelist;
 class Enemy;
+struct b2WorldDef;
+struct b2WorldId;
 class DynamicText;  // for the HUD labels
 
 // Class declaration:
@@ -62,6 +64,12 @@ protected:
 	// HUD text labels
 	DynamicText* m_pLivesText;
 	DynamicText* m_pWaveText;
+
+
+	//box2d world variables
+	int ScenesubStepCount;//how many times we check for collisions basically
+	b2WorldDef* World;//the worlddef that holds its attributes
+	b2WorldId WorldPointer;//the world pointer for us to access the world
 
 private:
 };

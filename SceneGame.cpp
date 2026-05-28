@@ -17,6 +17,7 @@
 #include "Tilelist.h"
 #include <iostream>
 #include <string>
+#include <box2d.h>
 
 // each wave will spawn this many enemies per wave level
 // so wave 1 = 3 enemy, wave 2 = 6 enemy, and so on
@@ -72,6 +73,10 @@ SceneGame::~SceneGame()
 
 	delete m_pWaveText;
 	m_pWaveText = 0;
+	//destroy the world
+	b2DestroyWorld(WorldPointer);
+	delete World;
+	std::cout << "WORLD DESTROYED\n";
 }
 
 bool SceneGame::Initialise(Renderer& renderer)
@@ -79,6 +84,15 @@ bool SceneGame::Initialise(Renderer& renderer)
 	srand(time(NULL));
 	const int SCREEN_WIDTH = renderer.GetWidth();
 	const int SCREEN_HEIGHT = renderer.GetHeight();
+
+	//set up the world for box2d objects to exist in
+	World = new b2WorldDef();
+	*World = b2DefaultWorldDef();
+	WorldPointer = b2CreateWorld(World);
+	b2World_SetGravity(WorldPointer, { 0,0 });//we dont want these objects to fall to the ground, so make it have 0 gravity
+	ScenesubStepCount = 16;//check 16 times for collisions so we dont get objects that move fast phasing through eachother
+	
+
 	list = new Tilelist();
 	pathmaker = new Pathmaker();
 	moving = true;
@@ -151,13 +165,17 @@ SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 		// path drawing is finish, now run the enemy wave logic
 		m_fSpawnTimer += deltaTime;
 
+		
+		b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);//move the box2d world forward by deltatime, do NOT multiply any other box2d object/function with deltatime except this one
+		
+		
 		// if still have enemy to spawn this wave and timer is ready, spawn one
 		if (m_iEnemiesToSpawn > 0 && m_fSpawnTimer >= SPAWN_INTERVAL && m_pRenderer != 0)
 		{
 			m_fSpawnTimer = 0.0f;
 
 			Enemy* newEnemy = new Enemy();
-			newEnemy->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize);
+			newEnemy->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize,WorldPointer);
 			m_enemies.push_back(newEnemy);
 
 			m_iEnemiesToSpawn--;
@@ -203,10 +221,10 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 
 	// check boundary, make sure player not go outside the grid
 	// bug fix: rows and columns was swap here before, cause player can walk off screen
-	if ((position.x + xoffset >= columns)
+	if ((position.x + xoffset >= rows)
 	||  (position.x + xoffset < 0)
 	||  (position.y + yoffset < 0)
-	||  (position.y + yoffset >= rows))
+	||  (position.y + yoffset >= columns))
 	{
 		return false;
 	}

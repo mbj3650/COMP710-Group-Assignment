@@ -6,6 +6,7 @@
 #include "renderer.h"
 #include <cmath>
 #include <cassert>
+#include <box2d.h>
 
 Enemy::Enemy()
 {
@@ -20,11 +21,15 @@ Enemy::Enemy()
 
 Enemy::~Enemy()
 {
+	//destroy its body so that we dont get memory leaks
+	if (b2Body_IsValid(ID)) {
+		b2DestroyBody(ID);//destroy impact body
+	}
 	delete m_pSprite;
 	m_pSprite = 0;
 }
 
-bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize)
+bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID)
 {
 	assert(startTile);
 
@@ -45,14 +50,40 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize)
 	float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
 	m_pSprite->SetScale(scale);
 
-	m_pSprite->SetX((int)m_x);
-	m_pSprite->SetY((int)m_y);
+
+	//SETTING UP BASIC BOX2D 
+	b2BodyDef WorldObj = b2DefaultBodyDef();
+	WorldObj.position = { m_x,m_y };//set initial positoin
+
+	//setup the hitbox
+	ID = b2CreateBody(WorldID, &WorldObj);
+	b2Body_SetType(ID, b2_dynamicBody);
+	b2Body_SetUserData(ID, this);
+	b2Polygon box = b2MakeRoundedBox(6* scale, 6* scale, 5.0f);
+
+	//all this does is basically give the physics objects its physics attributes
+	b2ShapeDef shapeDef = b2DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.friction = 0.1f;
+
+	shapeDef.filter.categoryBits = 0x0002;//i am this ID
+	shapeDef.filter.maskBits =  0x0002 ;//i collide with all things of this ID
+
+	//finally put it all together to create this object
+	shapeId = b2CreatePolygonShape(ID, &shapeDef, &box);
+
+	//get the position of our new box2d object, and then tell the sprite to appear there
+	m_pSprite->SetX(b2Body_GetPosition(ID).x);
+	m_pSprite->SetY(b2Body_GetPosition(ID).y);
 
 	return true;
 }
 
 void Enemy::Process(float deltaTime)
 {
+	//set m_x and m_y to the box2d object's position
+	m_x = b2Body_GetPosition(ID).x;
+	m_y = b2Body_GetPosition(ID).y;
 	// dont do anything if already done
 	if (m_bReachedEnd || m_pCurrentTile == 0)
 	{
@@ -92,13 +123,14 @@ void Enemy::Process(float deltaTime)
 	else
 	{
 		// move toward the target tile this frame
-		float step = m_speed * deltaTime;
-		m_x += (dx / dist) * step;
-		m_y += (dy / dist) * step;
+		b2Vec2 velocityVec = { (dx / dist) * m_speed , (dy / dist) * m_speed };
+		b2Body_SetLinearVelocity(ID, velocityVec);
+		//m_x += (dx / dist) * step;
+		//m_y += (dy / dist) * step;
 	}
 
-	m_pSprite->SetX((int)m_x);
-	m_pSprite->SetY((int)m_y);
+	m_pSprite->SetX(b2Body_GetPosition(ID).x);
+	m_pSprite->SetY(b2Body_GetPosition(ID).y);
 }
 
 void Enemy::Draw(Renderer& renderer)
