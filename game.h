@@ -27,6 +27,10 @@ public:
 	void ToggleDebugWindow();
 	void Quit();
 	void createSound(char path[]);
+
+	// Returns the FMOD system so scenes can load and play their own sounds
+	FMOD::System* GetSoundSystem() { return system; }
+
 protected:
 	void Process(float deltaTime);
 	void Draw(Renderer& renderer);
