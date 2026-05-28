@@ -109,14 +109,14 @@ bool SceneGame::Initialise(Renderer& renderer)
 	// centered = false mean position is anchor to top left of the text
 	m_pLivesText = new DynamicText();
 	m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
-	m_pLivesText->SetPosition(16, 16);
 	m_pLivesText->SetText(renderer, "Lives: 20");
+	m_pLivesText->SetPosition(16, 16);
 
 	// wave text go just below the lives text
 	m_pWaveText = new DynamicText();
 	m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
-	m_pWaveText->SetPosition(16, 48);
 	m_pWaveText->SetText(renderer, "Wave: 1");
+	m_pWaveText->SetPosition(16, 48);
 
 	return true;
 }

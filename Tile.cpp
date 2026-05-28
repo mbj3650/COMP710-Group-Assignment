@@ -30,7 +30,7 @@ bool
 Tile::Initialise(Renderer& renderer, Vector2 Pos, int rows, int columns)
 {
 	Position = Pos; // set position
-	m_pSprite = renderer.CreateSprite("..\\assets\\board8x8.png"); // set sprite
+	m_pSprite = renderer.CreateSprite("..\\assets\\stone4.png"); // set sprite
 
 	m_pSprite->SetScale( // set scale to make sure it fits in screen
 		renderer.GetWidth() / (m_pSprite->GetWidth() * (1.0 * columns))
