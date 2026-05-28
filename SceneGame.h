@@ -1,76 +1,85 @@
-// COMP710 GP Framework 2022
-#ifndef SCENEGAME_H
-#define SCENEGAME_H
-// Local includes:
+// COMP710 GP Framework 2025
+// SceneGame.h
+// Modified by: MartinYan12138y
+// Changes: Added game over state, restart system, and game over screen
+
+#ifndef __SCENEMAIN_H__
+#define __SCENEMAIN_H__
+
+// Parent include:
 #include "scene.h"
-#include <vector>
-#include "box2d.h"
+
 // Forward declarations:
 class Renderer;
 class Sprite;
-class AnimatedSprite;
-class Tile;
-class Pathmaker;
 class Tilelist;
+class Pathmaker;
 class Enemy;
-struct b2WorldDef;
-struct b2WorldId;
-class DynamicText;  // for the HUD labels
+class DynamicText;
 
-// Class declaration:
 class SceneGame : public Scene
 {
-	// Member methods:
+    // Member methods:
 public:
-	SceneGame();
-	virtual ~SceneGame();
-	virtual bool Initialise(Renderer& renderer);
-	void Move(SDL_Scancode key);
-	virtual void Process(float deltaTime, InputSystem& inputSystem);
-	bool MovePosition(int xoffset, int yoffset);
-	virtual void Draw(Renderer& renderer);
-	virtual void DebugDraw();
+    SceneGame();
+    virtual ~SceneGame();
+
+    virtual bool Initialise(Renderer& renderer);
+    virtual void Process(float deltaTime, InputSystem& inputSystem);
+    virtual void Draw(Renderer& renderer);
+    virtual void DebugDraw();
+
+    bool MovePosition(int xoffset, int yoffset);
+
+    // Resets the entire game state for a fresh start
+    void RestartGame(Renderer& renderer);
+
 protected:
 private:
-	SceneGame(const SceneGame& SceneGame);
-	SceneGame& operator=(const SceneGame& SceneGame);
-	// Member data:
+    SceneGame(const SceneGame& sceneMain);
+    SceneGame& operator=(const SceneGame& sceneMain);
+
+    // Member data:
 public:
 protected:
-	int x = 0;
-	int y = 0;
-	int rows;
-	int columns;
-	Tilelist* list;
-	Pathmaker* pathmaker;
-	std::vector<Tile*> Path;
-	AnimatedSprite* m_pCentre;
-	float m_angle;
-	float m_rotationSpeed;
-	bool moving;
+    Sprite* m_pCentre;
+    float m_angle;
+    float m_rotationSpeed;
 
-	// enemy / wave stuff
-	Renderer* m_pRenderer;
-	std::vector<Enemy*> m_enemies;
-	float m_fSpawnTimer;
-	float m_fTileSize;
-	int m_iLives;
+    Renderer*  m_pRenderer;
+    Tilelist*  list;
+    Pathmaker* pathmaker;
 
-	// wave tracking
-	int m_iWave;              // which wave we're on
-	int m_iEnemiesToSpawn;    // how many left to spawn this wave
-	bool m_bWaveComplete;     // waiting between waves
+    bool    moving;
+    int     columns;
+    int     rows;
+    int     x;
+    int     y;
+    float   m_fTileSize;
 
-	// HUD text labels
-	DynamicText* m_pLivesText;
-	DynamicText* m_pWaveText;
+    // Wave and lives
+    int   m_iLives;
+    int   m_iWave;
+    int   m_iEnemiesToSpawn;
+    bool  m_bWaveComplete;
+    float m_fSpawnTimer;
 
+    std::vector<Enemy*> m_enemies;
 
-	//box2d world variables
-	int ScenesubStepCount;//how many times we check for collisions basically
-	b2WorldDef* World;//the worlddef that holds its attributes
-	b2WorldId WorldPointer;//the world pointer for us to access the world
+    DynamicText* m_pLivesText;
+    DynamicText* m_pWaveText;
+
+    // Box2D world
+    b2WorldId    WorldPointer;
+    b2WorldDef*  World;
+    int          ScenesubStepCount;
+
+    // --- Game Over ---
+    bool    m_bGameOver;
+    Sprite* m_pGameOverSprite;   // Displays defeated_gameover.png
+    DynamicText* m_pRestartText; // "Press R to restart" hint
 
 private:
 };
-#endif // SCENEGAME_H
+
+#endif // __SCENEMAIN_H__
