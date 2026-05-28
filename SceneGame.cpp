@@ -132,37 +132,7 @@ SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 				std::cout << "enemy got through! lives left: " << m_iLives << "\n";
 				// TODO: game over screen when lives hit 0
 			}
-	list->Process(deltaTime);//process all tiles in lists in case they need updates or whatnot
-	if (moving) {
-		//MOVEMENT FOR MAKING PATHS
-		if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) {//CHECK IF KEY PRESSED
-			std::cout << "w\n";//DEBUG OUTPUT
-			(MovePosition(-1, 0));
-
-		}
-
-		//SAME FOR THESE KEYS
-		else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED) {
-			std::cout << "s\n";
-			(MovePosition(1, 0));
-		}
-
-
-		else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED) {
-			std::cout << "a\n";
-			(MovePosition(0, -1));
-		}
-
-		else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED) {
-			std::cout << "d\n";
-			(MovePosition(0, 1));
-		}
-
-		if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED) {//CHECK IF KEY PRESSED
-			std::cout << "w\n";//DEBUG OUTPUT
-			Vector2 pos = (list->Undo());//set pathmaker to previous position
-			pathmaker->pos.x = pos.y;
-			pathmaker->pos.y = pos.x;
+			list->Process(deltaTime);//process all tiles in lists in case they need updates or whatnot
 		}
 
 	}
@@ -198,6 +168,9 @@ bool SceneGame::MovePosition(int xoffset, int yoffset) // CHECKS IF GIVEN POSITI
 		list->path.push_back(NextTile);
 		if (list->isEnd(pathmaker->pos))
 		{
+			moving = false;
+		}
+	}
 	
 }
 
