@@ -1,47 +1,65 @@
 // Enemy.h
-// Handles an enemy that walks along the path the player drew
-// Uses the tile linked list (NextPosition) to figure out where to go
+// Handles an enemy that walks along the path the player drew.
+// Uses the tile linked list (NextPosition) to figure out where to go.
+// Modified by: MartinYan12138y
+// Changes: Added HP system (TakeDamage, IsDead) for tower damage integration,
+//          GetX/GetY accessors for particle effects.
 
 #ifndef ENEMY_H
 #define ENEMY_H
 #include <box2d.h>
+
 class Renderer;
 class Sprite;
 class Tile;
 struct b2WorldId;
 struct b2ShapeId;
 struct b2BodyId;
+
 class Enemy
 {
 public:
-	Enemy();
-	~Enemy();
+    Enemy();
+    ~Enemy();
 
+    // waveNumber scales the enemy's starting HP (wave 1 = 3HP, wave 2 = 5HP, etc.)
+    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize,
+                    b2WorldId WorldID, int waveNumber = 1);
+    void Process(float deltaTime);
+    void Draw(Renderer& renderer);
 
-	// pass in the start tile and how big each tile is in pixels, as well as the WorldID for box2d implementation
-	bool Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID);
-	void Process(float deltaTime);
-	void Draw(Renderer& renderer);
+    bool HasReachedEnd() const { return m_bReachedEnd; }
 
-	bool HasReachedEnd() { return m_bReachedEnd; }
+    // HP system -- used by towers to damage enemies
+    void TakeDamage(int amount);
+    bool IsDead()     const { return m_iHP <= 0; }
+    int  GetHP()      const { return m_iHP; }
+    int  GetMaxHP()   const { return m_iMaxHP; }
+
+    // Position accessors -- used by SceneGame to spawn particle bursts
+    float GetX() const { return m_x; }
+    float GetY() const { return m_y; }
 
 private:
-	Enemy(const Enemy&);
-	Enemy& operator=(const Enemy&);
+    Enemy(const Enemy&);
+    Enemy& operator=(const Enemy&);
 
-	Sprite* m_pSprite;
-	Tile* m_pCurrentTile;  // which tile the enemy is currently moving toward
+    Sprite* m_pSprite;
+    Tile*   m_pCurrentTile;
 
-	b2BodyId ID;//its hitbox
-	b2ShapeId shapeId;//its shapeid (this is for if we want to change friction, density or what it can collide with on the fly)
-	// screen position (not grid position)
-	float m_x;
-	float m_y;
+    b2BodyId  ID;
+    b2ShapeId shapeId;
 
-	float m_speed;     // pixels per second
-	float m_tileSize;  // needed to convert grid coords to screen coords
+    float m_x;
+    float m_y;
+    float m_speed;
+    float m_tileSize;
 
-	bool m_bReachedEnd;
+    bool m_bReachedEnd;
+
+    // HP
+    int m_iHP;
+    int m_iMaxHP;
 };
 
 #endif // ENEMY_H
