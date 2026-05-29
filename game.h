@@ -22,6 +22,7 @@ public:
 	static Game& GetInstance();
 	static void DestroyInstance();
 	bool Initialise();
+	void NextScene();
 	bool DoGameLoop();
 	void DebugDraw();
 	void ToggleDebugWindow();

@@ -11,6 +11,7 @@
 #include "Pathmaker.h"
 #include "Tile.h"
 #include "Enemy.h"
+#include "Tower.h"
 #include "DynamicText.h"
 #include "game.h"
 #include <cassert>
@@ -85,6 +86,13 @@ SceneGame::~SceneGame()
     }
     m_enemies.clear();
 
+    for (int i = 0; i < (int)m_towers.size(); i++)
+    {
+        delete m_towers[i];
+        m_towers[i] = 0;
+    }
+    m_towers.clear();
+
     delete m_pLivesText;   m_pLivesText   = 0;
     delete m_pWaveText;    m_pWaveText    = 0;
     delete m_pGameOverSprite; m_pGameOverSprite = 0;
@@ -130,16 +138,6 @@ bool SceneGame::Initialise(Renderer& renderer)
     m_pRenderer = &renderer;
     m_fTileSize = (float)W / (float)columns;
 
-    // HUD
-    m_pLivesText = new DynamicText();
-    m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
-    m_pLivesText->SetText(renderer, "Lives: 20");
-    m_pLivesText->SetPosition(16, 16);
-
-    m_pWaveText = new DynamicText();
-    m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
-    m_pWaveText->SetText(renderer, "Wave: 1");
-    m_pWaveText->SetPosition(16, 48);
 
     // Game over image
     m_pGameOverSprite = renderer.CreateSprite(GAMEOVER_IMAGE_PATH);
@@ -152,10 +150,17 @@ bool SceneGame::Initialise(Renderer& renderer)
         m_pGameOverSprite->SetY(H / 2);
     }
 
-    m_pRestartText = new DynamicText();
-    m_pRestartText->Initialise(renderer, FONT_PATH, 32, true);
-    m_pRestartText->SetText(renderer, "Press R to Restart");
-    m_pRestartText->SetPosition((float)(W / 2), (float)(H - 80));
+
+    // Particles -- pre-initialise pool with shared explosion sprite
+    m_pParticleSprite = renderer.CreateSprite(EXPLOSION_PATH);
+    if (m_pParticleSprite)
+    {
+        m_pParticleSprite->SetScale(0.3f);
+        for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
+        {
+            m_particlePool[i].Initialise(*m_pParticleSprite);
+        }
+    }
 
     // Instructions overlay -- lines spaced 40px apart, centred on screen
     int startY = H / 2 - (NUM_INSTRUCTION_LINES * 40) / 2;
@@ -169,23 +174,26 @@ bool SceneGame::Initialise(Renderer& renderer)
         m_pInstructions[i]->SetPosition((float)(W / 2), (float)(startY + i * 40));
     }
 
-    // Particles -- pre-initialise pool with shared explosion sprite
-    m_pParticleSprite = renderer.CreateSprite(EXPLOSION_PATH);
-    if (m_pParticleSprite)
-    {
-        m_pParticleSprite->SetScale(0.3f);
-        for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
-        {
-            m_particlePool[i].Initialise(*m_pParticleSprite);
-        }
-    }
+    m_pRestartText = new DynamicText();
+    m_pRestartText->Initialise(renderer, FONT_PATH, 32, true);
+    m_pRestartText->SetText(renderer, "Press R to Restart");
+    m_pRestartText->SetPosition((float)(W / 2), (float)(H - 80));
+    // HUD
+    m_pLivesText = new DynamicText();
+    m_pLivesText->Initialise(renderer, FONT_PATH, 24, false);
+    m_pLivesText->SetText(renderer, "Lives: 20");
+    m_pLivesText->SetPosition(16, 16);
 
+    m_pWaveText = new DynamicText();
+    m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
+    m_pWaveText->SetText(renderer, "Wave: 1");
+    m_pWaveText->SetPosition(16, 48);
     // FMOD
     FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
     if (fmod)
     {
-        fmod->createSound(MUSIC_BG_PATH,        FMOD_LOOP_NORMAL | FMOD_CREATESTREAM, 0, &m_pMusicBG);
-        fmod->createSound(SOUND_GAMEOVER_PATH,  FMOD_DEFAULT, 0, &m_pSoundGameOver);
+        fmod->createSound(MUSIC_BG_PATH, FMOD_LOOP_NORMAL | FMOD_CREATESTREAM, 0, &m_pMusicBG);
+        fmod->createSound(SOUND_GAMEOVER_PATH, FMOD_DEFAULT, 0, &m_pSoundGameOver);
         fmod->createSound(SOUND_WAVESTART_PATH, FMOD_DEFAULT, 0, &m_pSoundWaveStart);
         if (m_pMusicBG) fmod->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
     }
@@ -209,15 +217,15 @@ void SceneGame::SpawnBurst(float x, float y)
             float angle = ((float)rand() / RAND_MAX) * 6.2832f; // 0 to 2pi
             float speed = 60.0f + ((float)rand() / RAND_MAX) * 80.0f;
 
-            m_particlePool[i].m_bAlive       = true;
-            m_particlePool[i].m_fCurrentAge  = 0.0f;
+            m_particlePool[i].m_bAlive = true;
+            m_particlePool[i].m_fCurrentAge = 0.0f;
             m_particlePool[i].m_fMaxLifespan = 0.5f + ((float)rand() / RAND_MAX) * 0.3f;
-            m_particlePool[i].m_postion      = { x, y };
-            m_particlePool[i].m_velocity     = { cosf(angle) * speed, sinf(angle) * speed };
+            m_particlePool[i].m_postion = { x, y };
+            m_particlePool[i].m_velocity = { cosf(angle) * speed, sinf(angle) * speed };
             m_particlePool[i].m_acceleration = { 0.0f, 40.0f }; // slight gravity
-            m_particlePool[i].m_fColour[0]   = 1.0f;            // red-orange tint
-            m_particlePool[i].m_fColour[1]   = 0.5f;
-            m_particlePool[i].m_fColour[2]   = 0.0f;
+            m_particlePool[i].m_fColour[0] = 1.0f;            // red-orange tint
+            m_particlePool[i].m_fColour[1] = 0.5f;
+            m_particlePool[i].m_fColour[2] = 0.0f;
             spawned++;
         }
     }
@@ -253,24 +261,34 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     }
 
     // --- Normal game ---
-    list->Process(deltaTime);
+    list->Process(deltaTime, inputSystem);
 
     if (moving)
     {
-        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) MovePosition(-1,  0);
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED) MovePosition( 1,  0);
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED) MovePosition( 0, -1);
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED) MovePosition( 0,  1);
+        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) MovePosition(-1, 0);
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED) MovePosition(1, 0);
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED) MovePosition(0, -1);
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED) MovePosition(0, 1);
 
         if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED)
         {
             Vector2 pos = list->Undo();
-            pathmaker->pos.x = pos.x;
-            pathmaker->pos.y = pos.y;
+            pathmaker->pos.x = pos.y;//ok so i kind of goofed up with the implementation here where the pathmaker x and y are flipped and wrong
+            pathmaker->pos.y = pos.x;
         }
+        if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
+            if (list->Hovered->hastower == false) {
+                Tower* newTower = new Tower();
+                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer);
+                m_towers.push_back(newTower);
+            }
+        }
+      
     }
     else
     {
+
+       
         m_fSpawnTimer += deltaTime;
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
@@ -281,6 +299,11 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave);
             m_enemies.push_back(e);
             m_iEnemiesToSpawn--;
+        }
+
+        for (int i = (int)m_towers.size() - 1; i >= 0; i--)//tower process
+        {
+            m_towers[i]->Process(deltaTime);
         }
 
         for (int i = (int)m_enemies.size() - 1; i >= 0; i--)
@@ -357,6 +380,7 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 
 void SceneGame::Draw(Renderer& renderer)
 {
+
     // Instructions overlay
     if (m_bShowInstructions)
     {
@@ -382,6 +406,9 @@ void SceneGame::Draw(Renderer& renderer)
     for (int i = 0; i < (int)m_enemies.size(); i++)
         m_enemies[i]->Draw(renderer);
 
+
+    for (int i = 0; i < (int)m_towers.size(); i++)
+        m_towers[i]->Draw(renderer);
     // Particles drawn on top of enemies
     for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
         if (m_particlePool[i].m_bAlive) m_particlePool[i].Draw(renderer);
@@ -395,6 +422,8 @@ void SceneGame::Draw(Renderer& renderer)
 
 void SceneGame::DebugDraw()
 {
+    list->DebugDraw();
+
     ImGui::Text("Scene: Grid");
     ImGui::InputFloat("Rotation speed", &m_rotationSpeed);
     ImGui::SliderInt("Start row",    &x, 0, rows    - 1, "%d");
