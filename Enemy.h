@@ -26,6 +26,8 @@ public:
     bool Initialise(Renderer& renderer, Tile* startTile, float tileSize,
                     b2WorldId WorldID, int waveNumber = 1);
     void Process(float deltaTime);
+    void TurnRed();
+    void TurnBlue();
     void Draw(Renderer& renderer);
 
     bool HasReachedEnd() const { return m_bReachedEnd; }

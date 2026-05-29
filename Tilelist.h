@@ -6,6 +6,7 @@
 // Forward declarations:
 class Renderer;
 class Tile;
+class InputSystem;
 // Class declaration:
 class Tilelist
 {
@@ -15,7 +16,7 @@ public:
 	~Tilelist();
 
 	bool Initialise(Renderer& renderer, int rows, int columns);
-	void Process(float deltaTime);
+	void Process(float deltaTime, InputSystem& input);
 	void Draw(Renderer& renderer);
 	void setStart();//sets tile to be "start"
 	void setEnd();//sets tlie to be "end"
@@ -24,7 +25,8 @@ public:
 	Vector2 Undo();
 	bool isEnd(Vector2 Position);
 	Tile* GetStart();
-
+	Tile* GetHovered();
+	void DebugDraw();
 protected:
 
 private:
@@ -35,6 +37,8 @@ private:
 public:
 	std::vector<Tile*> tiles;
 	std::vector<Tile*> path;
+	Tile* Hovered;
+	Vector2 tilehover;
 	Vector2 Startpos;
 	Vector2 Endpos;
 	int rows;

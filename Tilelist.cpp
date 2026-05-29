@@ -9,7 +9,8 @@
 // Library includes:
 #include <cassert>
 #include "inlinehelpers.h"
-
+#include "inputsystem.h"
+#include "lib/imgui/imgui.h"
 Tilelist::Tilelist()
 {
 
@@ -38,8 +39,8 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 			tiles.push_back(NewTile);
 		}
 	}
-	Startpos = { (GetRandomf(0, rows)),(GetRandomf(2, 4)) };//set starting tile via random
-	Endpos = {  (GetRandomf(0, rows)),columns -4 +  (GetRandomf(0,3)) };//set end tile via random
+	Startpos = { (GetRandomf(4, rows-2)), (GetRandomf(2, 4)) };//set starting tile via random
+	Endpos = { (GetRandomf(4, rows-2)), 4+ (GetRandomf(2, 4)) };//set end tile via random
 	if (Endpos.y >= columns) {//make sure its in bounds
 		Endpos.y = columns-1;
 
@@ -55,8 +56,18 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 };
 
 void
-Tilelist::Process(float deltaTime)
+Tilelist::Process(float deltaTime, InputSystem& input)
 {
+	Vector2 mousepos = input.GetMousePosition();
+	tilehover = {  mousepos.y / tiles.at(0)->GetWidth(),mousepos.x / tiles.at(0)->GetWidth() };
+	if(Hovered == NULL){//if not hovering on anything
+		Hovered = GetTile(tilehover);//set first hovered tile to be hovered
+	}
+	else if (GetTile(tilehover) != NULL && GetTile(tilehover) != Hovered) {//if found new tile thats being hovered over
+		Hovered->hovered = false;//set previous path to no longer be hovered
+		Hovered = GetTile(tilehover);//get the new tile
+		Hovered->hovered = true;//set new tile to be hovered
+	}
 	for (int k = 0; k < tiles.size(); ++k)
 	{
 		tiles.at(k)->Process(deltaTime);
@@ -114,4 +125,8 @@ bool Tilelist::isEnd(Vector2 Position) {//check if player has reached the end
 
 Tile* Tilelist::GetStart() {//get start tile
 	return GetTile(Startpos);
+}
+
+void Tilelist::DebugDraw() {
+	ImGui::Text("Tile Hovered pos: %d,%d", (int)tilehover.x, (int)tilehover.y);
 }

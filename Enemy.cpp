@@ -27,6 +27,7 @@ Enemy::Enemy()
 
 Enemy::~Enemy()
 {
+    std::cout << "Erased shape!\n";
     if (b2Body_IsValid(ID))
     {
         b2DestroyBody(ID);
@@ -67,9 +68,9 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     shapeDef.density      = 1.0f;
     shapeDef.friction     = 0.1f;
     shapeDef.filter.categoryBits = 0x0002;
-    shapeDef.filter.maskBits     = 0x0002;
+    shapeDef.filter.maskBits  = 0x0002 | 0x0001;
     shapeId = b2CreatePolygonShape(ID, &shapeDef, &box);
-
+    b2Shape_SetUserData(shapeId, this);
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
 
@@ -125,6 +126,18 @@ void Enemy::Process(float deltaTime)
 
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
+}
+
+void Enemy::TurnRed() {
+    m_pSprite->SetBlueTint(0.0f);
+    m_pSprite->SetGreenTint(0.0f);
+    m_pSprite->SetRedTint(1.0f);
+}
+
+void Enemy::TurnBlue() {
+    m_pSprite->SetBlueTint(1.0f);
+    m_pSprite->SetGreenTint(0.0f);
+    m_pSprite->SetRedTint(0.0f);
 }
 
 void Enemy::Draw(Renderer& renderer)

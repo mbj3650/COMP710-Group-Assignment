@@ -13,12 +13,13 @@
 #include "fmod.hpp"
 #include "Particle.h"
 #include <vector>
-
+#include "box2d.h"
 class Renderer;
 class Sprite;
 class Tilelist;
 class Pathmaker;
 class Enemy;
+class Tower;
 class DynamicText;
 
 // Number of instruction text lines shown at game start
@@ -81,7 +82,7 @@ protected:
     float m_fSpawnTimer;
 
     std::vector<Enemy*> m_enemies;
-
+    std::vector<Tower*> m_towers;//tower list
     DynamicText* m_pLivesText;
     DynamicText* m_pWaveText;
 

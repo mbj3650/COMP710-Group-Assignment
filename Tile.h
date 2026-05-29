@@ -18,6 +18,7 @@ public:
 	void Process(float deltaTime);
 	void UpdateDraw();//manually called to update a tile to change its appearance 
 	void Draw(Renderer& renderer);
+	int GetWidth();
 	void setStart();//set as start
 	void setEnd();
 	void setNext(Tile* NextPosition);
@@ -35,9 +36,14 @@ private:
 public:
 	Vector2 Position;
 	Sprite* m_pSprite;
+	Sprite* m_pSpriteSand;
+	Sprite* Sprites[2];
+	int currentsprite;
 	bool isPath;
 	bool isStart;
+	bool hastower;
 	bool isEnd;
+	bool hovered;
 	int Connections;//if has more than 2 connections, something has gone wrong and we must not allow the player to continue as long as theres 3+ connections 
 	Tile* PrevPosition;
 	Tile* NextPosition;
