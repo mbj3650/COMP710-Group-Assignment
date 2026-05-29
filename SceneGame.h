@@ -3,6 +3,8 @@
 // Modified by: MartinYan12138y
 // Changes: Game over state + restart, FMOD audio, instructions overlay,
 //          particle burst effects, enemy HP integration.
+//          Gold economy system (kill bounty + decay, pay window,
+//          short-path bonus, spend interface for towers).
 
 #ifndef __SCENEMAIN_H__
 #define __SCENEMAIN_H__
@@ -39,9 +41,21 @@ public:
     bool MovePosition(int xoffset, int yoffset);
     void RestartGame(Renderer& renderer);
 
+    // --- Economy (Gold) ---
+    // Other systems (towers, upgrades, relics) use these to read/spend gold.
+    int  GetGold() const { return m_iGold; }
+    bool TrySpend(int cost);       // pay for a tower/upgrade; false if too poor
+    void AddGold(int amount);      // generic reward (relics, events, etc.)
+    void AddGoldStrikeBonus();     // Pickaxe "Gold Striker" extra gold on a kill
+
 private:
     SceneGame(const SceneGame&);
     SceneGame& operator=(const SceneGame&);
+
+    // Economy helpers (kept private -- internal book-keeping)
+    int  KillBounty(int wave) const;  // gold for one normal kill (with wave decay)
+    bool IsPayWindowOpen() const;     // are kills still rewarded this wave?
+    void RefreshGoldText();           // update the HUD gold label
 
 protected:
     Sprite*    m_pCentre;
@@ -70,6 +84,12 @@ protected:
 
     DynamicText* m_pLivesText;
     DynamicText* m_pWaveText;
+
+    // --- Economy (Gold) ---
+    int          m_iGold;
+    DynamicText* m_pGoldText;
+    float        m_fWaveTimer;         // seconds since the first enemy of this wave spawned
+    bool         m_bWaveTimerStarted;  // pay window only starts ticking once enemies appear
 
     // Box2D
     b2WorldId   WorldPointer;
