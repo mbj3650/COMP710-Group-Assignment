@@ -146,13 +146,6 @@ bool SceneGame::Initialise(Renderer& renderer)
     m_pRenderer = &renderer;
     m_fTileSize = (float)W / (float)columns;
 
-
-    // Gold counter -- sits just under the lives/wave HUD
-    m_pGoldText = new DynamicText();
-    m_pGoldText->Initialise(renderer, FONT_PATH, 24, false);
-    m_pGoldText->SetText(renderer, "Gold: " + std::to_string(m_iGold));
-    m_pGoldText->SetPosition(16, 80);
-
     // Game over image
     m_pGameOverSprite = renderer.CreateSprite(GAMEOVER_IMAGE_PATH);
     if (m_pGameOverSprite)
@@ -202,6 +195,13 @@ bool SceneGame::Initialise(Renderer& renderer)
     m_pWaveText->Initialise(renderer, FONT_PATH, 24, false);
     m_pWaveText->SetText(renderer, "Wave: 1");
     m_pWaveText->SetPosition(16, 48);
+
+    // Gold counter -- sits just under the lives/wave HUD
+    m_pGoldText = new DynamicText();
+    m_pGoldText->Initialise(renderer, FONT_PATH, 24, false);
+    m_pGoldText->SetText(renderer, "Gold: " + std::to_string(m_iGold));
+    m_pGoldText->SetPosition(16, 80);
+
     // FMOD
     FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
     if (fmod)

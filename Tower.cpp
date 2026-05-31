@@ -62,12 +62,13 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     shapeDef.filter.categoryBits = 0x0001;
     shapeDef.filter.maskBits = 0x0002;//detect enemies
     shapeDef.isSensor = true;//set it to be a sensor
+   
     shapeId = b2CreateCircleShape(ID, &shapeDef, &circleShape);
-    
+    b2Shape_SetUserData(shapeId, this);
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
    
-
+    std::cout << "made tower!\n" << b2Shape_GetUserData(shapeId) << "\n";
 
     return true;
 }
@@ -86,25 +87,30 @@ void Tower::Process(float deltaTime)
     for (int i = 0; i < sensorEvents.beginCount; ++i)//go through all events where the shape is beginning to collide
     {
         b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;//get the beginevent 
-        void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);//get the object its colliding with
-        Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);
-        EnemyInRadius.push_back(beginTouch->visitorShapeId);//add enemy to list of enemies in radius
-        NewEnemy->TurnRed();
+        if (B2_ID_EQUALS(shapeId, beginTouch->sensorShapeId)) {//CHECK IF THE SENSOR EVENT IS RELEVANT 
+            void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);//get the object its colliding with
+            Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);
+            EnemyInRadius.push_back(beginTouch->visitorShapeId);//add enemy to list of enemies in radius
+            NewEnemy->TurnRed();
+        }
+       
     }
 
     for (int i = 0; i < sensorEvents.endCount; ++i)//go through all events where the shape is beginning to collide
     {
         b2SensorEndTouchEvent* endTouch = sensorEvents.endEvents + i;//get the endevent 
-        if (b2Shape_IsValid(endTouch->visitorShapeId)) {
-            std::cout << "Removed Enemy left radius!\n";
-            void* myUserData = b2Shape_GetUserData(endTouch->visitorShapeId);//get the object its colliding with
+        if (B2_ID_EQUALS(shapeId, endTouch->sensorShapeId)) {//CHECK IF THE SENSOR EVENT IS RELEVANT 
+            if (b2Shape_IsValid(endTouch->visitorShapeId)) {
+                std::cout << b2Shape_GetUserData(shapeId) << "Removed Enemy left radius!\n";
+                void* myUserData = b2Shape_GetUserData(endTouch->visitorShapeId);//get the object its colliding with
 
-            Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);//turn to enemy
-            NewEnemy->TurnBlue();
-            for (int i = 0; i < EnemyInRadius.size(); i++) {
-                if (B2_ID_EQUALS(EnemyInRadius.at(i), endTouch->visitorShapeId)) {
-                    EnemyInRadius.erase(EnemyInRadius.begin() + i);//remove from list of enemies in range
-                    break;
+                Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);//turn to enemy
+                NewEnemy->TurnBlue();
+                for (int i = 0; i < EnemyInRadius.size(); i++) {
+                    if (B2_ID_EQUALS(EnemyInRadius.at(i), endTouch->visitorShapeId)) {
+                        EnemyInRadius.erase(EnemyInRadius.begin() + i);//remove from list of enemies in range
+                        break;
+                    }
                 }
             }
         }
