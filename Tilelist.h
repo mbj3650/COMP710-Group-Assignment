@@ -7,6 +7,15 @@
 class Renderer;
 class Tile;
 class InputSystem;
+// ---------------------------------------------------------------------------
+// COORDINATE CONVENTION (unified across the grid/path system):
+//   Vector2.x = COLUMN  (horizontal, screen X)
+//   Vector2.y = ROW     (vertical,   screen Y)
+// Tiles are stored column-major, so the index of a tile is:
+//   index = column * rows + row   (== Pos.x * rows + Pos.y)
+// Tile::Position, Enemy and Tower already use this same convention, so do not
+// re-introduce the old (x=row, y=column) layout that used to live here.
+// ---------------------------------------------------------------------------
 // Class declaration:
 class Tilelist
 {

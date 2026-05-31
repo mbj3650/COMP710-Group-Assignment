@@ -10,6 +10,7 @@
 #include <box2d.h>
 #include "Enemy.h"
 #include <algorithm>
+#include "EconomyConfig.h" // tower attack radius config
 Tower::Tower()
 {
     m_pSprite = 0;
@@ -55,7 +56,9 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     //b2Polygon box = b2MakeRoundedBox(6 * scale, 6 * scale, 5.0f);
     b2Circle circleShape;//make circle radius
     circleShape.center = { 0,0 };
-    circleShape.radius = 200;
+    // Radius now scales with the tile size instead of a hardcoded 200px.
+    // Tune the default in EconomyConfig.h (TOWER_RADIUS_TILES_DEFAULT).
+    circleShape.radius = TOWER_RADIUS_TILES_DEFAULT * m_tileSize;
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.density = 1.0f;
     shapeDef.friction = 0.1f;

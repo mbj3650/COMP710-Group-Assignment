@@ -344,16 +344,17 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 
     if (moving)
     {
-        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) MovePosition(-1, 0);
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED) MovePosition(1, 0);
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED) MovePosition(0, -1);
-        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED) MovePosition(0, 1);
+        // MovePosition(xoffset, yoffset): xoffset moves COLUMN (x), yoffset moves ROW (y).
+        if (inputSystem.GetKeyState(SDL_SCANCODE_W) == BS_PRESSED) MovePosition(0, -1); // up    = row - 1
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_S) == BS_PRESSED) MovePosition(0, 1);  // down  = row + 1
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_A) == BS_PRESSED) MovePosition(-1, 0); // left  = col - 1
+        else if (inputSystem.GetKeyState(SDL_SCANCODE_D) == BS_PRESSED) MovePosition(1, 0);  // right = col + 1
 
         if (inputSystem.GetKeyState(SDL_SCANCODE_B) == BS_PRESSED)
         {
-            Vector2 pos = list->Undo();
-            pathmaker->pos.x = pos.y;//ok so i kind of goofed up with the implementation here where the pathmaker x and y are flipped and wrong
-            pathmaker->pos.y = pos.x;
+            // Undo() returns a Tile::Position, which now uses the SAME convention
+            // (x = column, y = row), so no more flipping is needed.
+            pathmaker->pos = list->Undo();
         }
         if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
             if (list->Hovered->hastower == false) {
@@ -458,8 +459,9 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 {
     Vector2 position = pathmaker->pos;
 
-    if ((position.x + xoffset >= rows) || (position.x + xoffset < 0)
-    ||  (position.y + yoffset < 0)     || (position.y + yoffset >= columns))
+    // x = column (bounded by columns), y = row (bounded by rows)
+    if ((position.x + xoffset >= columns) || (position.x + xoffset < 0)
+    ||  (position.y + yoffset < 0)        || (position.y + yoffset >= rows))
         return false;
 
     if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath)
@@ -542,7 +544,7 @@ void SceneGame::DebugDraw()
     ImGui::InputFloat("Rotation speed", &m_rotationSpeed);
     ImGui::SliderInt("Start row",    &x, 0, rows    - 1, "%d");
     ImGui::SliderInt("Start column", &y, 0, columns - 1, "%d");
-    list->GetTile(x, y)->isPath = true;
+    list->GetTile(y, x)->isPath = true; // GetTile(column, row): y is the column slider, x the row slider
 
     ImGui::Text("Lives: %d",             m_iLives);
     ImGui::Text("Wave: %d",              m_iWave);

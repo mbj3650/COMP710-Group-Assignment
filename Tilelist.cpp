@@ -39,14 +39,15 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 			tiles.push_back(NewTile);
 		}
 	}
-	Startpos = { (GetRandomf(4, rows-2)), (GetRandomf(2, 4)) };//set starting tile via random
-	Endpos = { (GetRandomf(4, rows-2)), columns- (GetRandomf(2, 4)) };//set end tile via random
-	if (Endpos.y >= columns) {//make sure its in bounds
-		Endpos.y = columns-1;
-
+	// Coordinate convention (UNIFIED): Vector2.x = COLUMN, Vector2.y = ROW.
+	// Start sits near the left edge (small column), end near the right edge.
+	Startpos = { (GetRandomf(2, 4)),            (GetRandomf(4, rows - 2)) };//set starting tile via random
+	Endpos   = { columns - (GetRandomf(2, 4)), (GetRandomf(4, rows - 2)) };//set end tile via random
+	if (Endpos.x >= columns) {//make sure its in bounds
+		Endpos.x = columns - 1;
 	}
-	else if (Endpos.y < 0) {//read above
-		Endpos.y = 0;
+	else if (Endpos.x < 0) {//read above
+		Endpos.x = 0;
 	}
 	GetTile(Startpos)->setStart();//set start
 	GetTile(Endpos)->setEnd();//set end
@@ -59,7 +60,8 @@ void
 Tilelist::Process(float deltaTime, InputSystem& input)
 {
 	Vector2 mousepos = input.GetMousePosition();
-	tilehover = {  mousepos.y / tiles.at(0)->GetWidth(),mousepos.x / tiles.at(0)->GetWidth() };
+	// x = COLUMN (from mouse X), y = ROW (from mouse Y)
+	tilehover = { mousepos.x / tiles.at(0)->GetWidth(), mousepos.y / tiles.at(0)->GetWidth() };
 	if(Hovered == NULL){//if not hovering on anything
 		Hovered = GetTile(tilehover);//set first hovered tile to be hovered
 	}
@@ -83,10 +85,11 @@ Tilelist::Draw(Renderer& renderer)
 };
 
 Tile* Tilelist::GetTile(Vector2 Pos) {
-	int x = Pos.x;
-	int y = Pos.y;
+	int x = Pos.x; // column
+	int y = Pos.y; // row
 	try {
-		return tiles.at((x)+(y * rows));
+		// tiles are stored column-major: index = column * rows + row
+		return tiles.at((x * rows) + (y));
 	}
 	catch (...) {
 		return NULL;
@@ -94,9 +97,9 @@ Tile* Tilelist::GetTile(Vector2 Pos) {
 }
 
 
-Tile* Tilelist::GetTile( int x,int y ) {
+Tile* Tilelist::GetTile( int x,int y ) { // x = column, y = row
 	try{
-		return tiles.at((x)+(y * rows));
+		return tiles.at((x * rows) + (y));
 	}
 	catch (...) {
 		return NULL;
