@@ -135,9 +135,9 @@ void Tower::Process(float deltaTime)
     }
     else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
         std::cout << "firing!\n";
-        Projectile* newprojectile = new Projectile();
-        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), canhome, pierceamount, damage, speed);
-        m_projectiles->push_back(newprojectile);
+        Projectile* newprojectile = new Projectile();//make new projectile
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), canhome, pierceamount, damage, speed);//add to it
+        m_projectiles->push_back(newprojectile);//
         firetimer = firedelay;
     }
 

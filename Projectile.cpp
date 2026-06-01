@@ -48,9 +48,14 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
 
     float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);
-    ishoming = Homing;
-    this->Target = Target;
-    m_speed = 300.0f*speed;
+
+    this->damage = damage;
+    ishoming = Homing;//if its homing or not
+    this->Target = Target;//what it should hit 
+    m_speed = 300.0f*speed;//speed of it
+
+
+
     // Box2D body setup
     b2BodyDef WorldObj = b2DefaultBodyDef();
     WorldObj.position = { m_x, m_y };
