@@ -40,7 +40,7 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 		}
 	}
 	Startpos = { (GetRandomf(4, rows-2)), (GetRandomf(2, 4)) };//set starting tile via random
-	Endpos = { (GetRandomf(4, rows-2)), columns- (GetRandomf(2, 4)) };//set end tile via random
+	Endpos = { (GetRandomf(4, rows-2)), (GetRandomf(2, 4)) };//set end tile via random
 	if (Endpos.y >= columns) {//make sure its in bounds
 		Endpos.y = columns-1;
 

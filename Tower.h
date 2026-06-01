@@ -9,6 +9,7 @@
 class Renderer;
 class Sprite;
 class Tile;
+class Projectile;
 struct b2WorldId;
 struct b2ShapeId;
 struct b2BodyId;
@@ -23,8 +24,8 @@ public:
     Tower();
     ~Tower();
 
+    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, float firedelay, int pierceamount, int damage, float speed);
 
-    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID);
     void Process(float deltaTime);
     void Draw(Renderer& renderer);
 
@@ -45,9 +46,11 @@ private:
 	// Member data:
 public:
     std::vector<b2ShapeId> EnemyInRadius;
+    std::vector<Projectile*>* m_projectiles;
 protected:
 
 private:
+    Renderer* m_renderer;//save renderer for projectile making
     Sprite* m_pSprite;
     Tile* m_pCurrentTile;
 
@@ -61,6 +64,13 @@ private:
     float m_y;
     float m_tileSize;
 
+    //information for the projectile
+    bool canhome;
+    int pierceamount;
+    int damage;
+    float speed;
+    float firetimer;
+    float firedelay;
 };
 
 #endif // __TOWER_H__

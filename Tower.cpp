@@ -4,6 +4,7 @@
 #include "Tile.h"
 #include "sprite.h"
 #include "renderer.h"
+#include "projectile.h"
 #include <cmath>
 #include <cassert>
 #include <iostream>
@@ -29,13 +30,23 @@ Tower::~Tower()
     m_pSprite = 0;
 }
 
-bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
-    b2WorldId WorldID)
+bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, float firedelay,int pierceamount,int damage,float speed)
 {
+    m_renderer = &renderer;
     assert(startTile);
     startTile->hastower = true;//set it to true so we cant place another tower on it
     m_tileSize = tileSize;
     m_pCurrentTile = startTile;
+
+
+    //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
+    this->pierceamount = pierceamount;
+    this->damage = damage;
+    this->firedelay = firedelay;
+    firetimer = firedelay;
+    this->speed = speed;
+    canhome = false;
+    m_projectiles = &projectileaddress;
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
@@ -118,6 +129,19 @@ void Tower::Process(float deltaTime)
         
        
     }
+
+    if (firetimer > 0) {//decrease timer
+        firetimer -= deltaTime;
+    }
+    else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
+        std::cout << "firing!\n";
+        Projectile* newprojectile = new Projectile();
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), canhome, pierceamount, damage, speed);
+        m_projectiles->push_back(newprojectile);
+        firetimer = firedelay;
+    }
+
+
 
 
     m_x = b2Body_GetPosition(ID).x;

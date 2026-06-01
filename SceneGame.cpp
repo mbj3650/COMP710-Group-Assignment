@@ -13,6 +13,7 @@
 #include "Pathmaker.h"
 #include "Tile.h"
 #include "Enemy.h"
+#include "projectile.h"
 #include "Tower.h"
 #include "DynamicText.h"
 #include "game.h"
@@ -99,6 +100,13 @@ SceneGame::~SceneGame()
         m_towers[i] = 0;
     }
     m_towers.clear();
+
+    for (int i = 0; i < (int)m_projectiles.size(); i++)
+    {
+        delete m_projectiles[i];
+        m_projectiles[i] = 0;
+    }
+    m_projectiles.clear();
 
     delete m_pLivesText;   m_pLivesText   = 0;
     delete m_pWaveText;    m_pWaveText    = 0;
@@ -355,19 +363,19 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             pathmaker->pos.x = pos.y;//ok so i kind of goofed up with the implementation here where the pathmaker x and y are flipped and wrong
             pathmaker->pos.y = pos.x;
         }
-        if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
-            if (list->Hovered->hastower == false) {
-                Tower* newTower = new Tower();
-                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer);
-                m_towers.push_back(newTower);
-            }
-        }
+       
       
     }
     else
     {
 
-       
+        if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
+            if (list->Hovered->hastower == false) {
+                Tower* newTower = new Tower();
+                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, 1.5, 10,20,2);
+                m_towers.push_back(newTower);
+            }
+        }
         m_fSpawnTimer += deltaTime;
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
@@ -389,6 +397,19 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         for (int i = (int)m_towers.size() - 1; i >= 0; i--)//tower process
         {
             m_towers[i]->Process(deltaTime);
+        }
+
+
+        for (int i = (int)m_projectiles.size() - 1; i >= 0; i--)//tower process
+        {
+            m_projectiles[i]->Process(deltaTime);
+
+
+            if (!m_projectiles.at(i)->GetAlive()) {//if projectile is dead
+                delete m_projectiles[i];
+                m_projectiles.erase(m_projectiles.begin() + i);
+                continue;
+            }
         }
 
         for (int i = (int)m_enemies.size() - 1; i >= 0; i--)
@@ -522,7 +543,10 @@ void SceneGame::Draw(Renderer& renderer)
 
     for (int i = 0; i < (int)m_towers.size(); i++)
         m_towers[i]->Draw(renderer);
-    // Particles drawn on top of enemies
+
+    for (int i = 0; i < (int)m_projectiles.size(); i++)
+        m_projectiles[i]->Draw(renderer);
+    // Particles drawn on top of entities
     for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
         if (m_particlePool[i].m_bAlive) m_particlePool[i].Draw(renderer);
 
@@ -580,6 +604,10 @@ void SceneGame::RestartGame(Renderer& renderer)
 
     for (int i = 0; i < (int)m_enemies.size(); i++) { delete m_enemies[i]; m_enemies[i] = 0; }
     m_enemies.clear();
+    for (int i = 0; i < (int)m_towers.size(); i++) { delete m_towers[i]; m_towers[i] = 0; }
+    m_towers.clear();
+    for (int i = 0; i < (int)m_projectiles.size(); i++) { delete m_projectiles[i]; m_projectiles[i] = 0; }
+    m_projectiles.clear();
 
     b2DestroyWorld(WorldPointer);
     delete World;

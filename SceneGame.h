@@ -18,6 +18,7 @@ class Renderer;
 class Sprite;
 class Tilelist;
 class Pathmaker;
+class Projectile;
 class Enemy;
 class Tower;
 class DynamicText;
@@ -83,6 +84,7 @@ protected:
 
     std::vector<Enemy*> m_enemies;
     std::vector<Tower*> m_towers;//tower list
+    std::vector<Projectile*> m_projectiles;//tower list
     DynamicText* m_pLivesText;
     DynamicText* m_pWaveText;
 

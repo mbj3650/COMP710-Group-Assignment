@@ -39,6 +39,7 @@
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="particleemitter.cpp" />
     <ClCompile Include="Pathmaker.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="SceneGame.cpp" />
@@ -78,6 +79,7 @@
     <ClInclude Include="Particle.h" />
     <ClInclude Include="particleemitter.h" />
     <ClInclude Include="Pathmaker.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="SceneGame.h" />

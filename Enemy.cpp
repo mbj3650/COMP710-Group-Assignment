@@ -68,7 +68,7 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     shapeDef.density      = 1.0f;
     shapeDef.friction     = 0.1f;
     shapeDef.filter.categoryBits = 0x0002;
-    shapeDef.filter.maskBits  = 0x0002 | 0x0001;
+    shapeDef.filter.maskBits  = 0x0002 | 0x0001 | 0x0003;
     shapeId = b2CreatePolygonShape(ID, &shapeDef, &box);
     b2Shape_SetUserData(shapeId, this);
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
