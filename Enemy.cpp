@@ -28,7 +28,7 @@ Enemy::Enemy()
 
 Enemy::~Enemy()
 {
-    std::cout << "Erased shape!\n";
+    std::cout << "Erased Enemy!\n";
     if (b2Body_IsValid(ID))
     {
         b2DestroyBody(ID);
@@ -55,9 +55,6 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
-
-    m_pSprite = renderer.CreateSprite("..\\assets\\ball.png");
-
    
     m_damage = Parser.GetValueAsInt(EnemyID + "|Damage");
     m_speed *= Parser.GetValueAsFloat(EnemyID + "|Speed");//multiply the speed so they can move faster or slower

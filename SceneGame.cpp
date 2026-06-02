@@ -146,8 +146,8 @@ bool SceneGame::Initialise(Renderer& renderer)
     list      = new Tilelist();
     pathmaker = new Pathmaker();
     moving    = true;
-    columns   = W / 60;
-    rows      = H / 60;
+    columns   = W / 40;
+    rows      = H / 40;
     list->Initialise(renderer, rows, columns);
     pathmaker->Initialise(renderer, list->Startpos);
 

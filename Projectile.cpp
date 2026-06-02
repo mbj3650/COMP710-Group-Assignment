@@ -30,6 +30,7 @@ Projectile::~Projectile()
         b2DestroyBody(ID);
     }
     delete m_pSprite;
+    m_pCurrentTile = 0;
     m_pSprite = 0;
 }
 
@@ -58,7 +59,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     m_pSprite->SetScale(scale);
 
     this->Target = Target;//what it should hit 
-    m_speed = (500.0f- (ishoming * 320))*speed;//speed of it
+    m_speed = (500.0f - (ishoming * 380)) * speed * (32 / m_tileSize);//speed of it
 
     lifetime = Parser.GetValueAsInt(ProjectileID + "|Lifetime");
 
@@ -117,12 +118,12 @@ void Projectile::Process(float deltaTime)
             float dist = sqrtf(dx * dx + dy * dy);
             bool atspeed = true;
             b2Vec2 vel = { (dx / dist) * m_speed*5, (dy / dist) * m_speed * 5 };//change velocity and direction
-            if (b2Body_GetLinearVelocity(ID).x > vel.x + 5 || b2Body_GetLinearVelocity(ID).x < vel.x - 5) {
-                b2Body_ApplyLinearImpulseToCenter(ID, {vel.x*25, 0}, true);
+            if (b2Body_GetLinearVelocity(ID).x > vel.x + 2 || b2Body_GetLinearVelocity(ID).x < vel.x - 2) {
+                b2Body_ApplyLinearImpulseToCenter(ID, {vel.x*12, 0}, true);
                 atspeed = false;
             }
-            if ( b2Body_GetLinearVelocity(ID).y > vel.y+5 || b2Body_GetLinearVelocity(ID).y < vel.y - 5) {
-                b2Body_ApplyLinearImpulseToCenter(ID, { 0 , vel.y * 25 }, true);
+            if ( b2Body_GetLinearVelocity(ID).y > vel.y+2 || b2Body_GetLinearVelocity(ID).y < vel.y - 2) {
+                b2Body_ApplyLinearImpulseToCenter(ID, { 0 , vel.y * 12 }, true);
                 atspeed = false;
             }
             if (atspeed) {

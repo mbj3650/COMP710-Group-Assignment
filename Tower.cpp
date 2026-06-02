@@ -52,7 +52,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     speed = Parser.GetValueAsFloat(TowerID + "|Speed");
     range = Parser.GetValueAsFloat(TowerID + "|Range");
     firedelay = Parser.GetValueAsFloat(TowerID + "|Firerate");
-    firetimer = firedelay;
+    firetimer = 0.1;
     canhome = false;
     m_projectiles = &projectileaddress;
 
