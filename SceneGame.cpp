@@ -146,8 +146,8 @@ bool SceneGame::Initialise(Renderer& renderer)
     list      = new Tilelist();
     pathmaker = new Pathmaker();
     moving    = true;
-    columns   = W / 40;
-    rows      = H / 40;
+    columns   = W / 60;
+    rows      = H / 60;
     list->Initialise(renderer, rows, columns);
     pathmaker->Initialise(renderer, list->Startpos);
 
@@ -373,7 +373,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
             if (list->Hovered->hastower == false) {
                 Tower* newTower = new Tower();
-                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, "Shooter");
+                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, "Poisoner");
                 m_towers.push_back(newTower);
             }
         }

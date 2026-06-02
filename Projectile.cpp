@@ -39,6 +39,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     m_tileSize = tileSize;
     IniParser Parser;
     Parser.LoadIniFile("..\\assets\\info\\projectile.ini");
+    this->owner = owner;
     m_x = owner->GetX();
     m_y = owner->GetY();
 
@@ -114,11 +115,17 @@ void Projectile::Process(float deltaTime)
             float dx = targetX - m_x;//update distances
             float dy = targetY - m_y;
             float dist = sqrtf(dx * dx + dy * dy);
-            b2Vec2 vel = { (dx / dist) * m_speed, (dy / dist) * m_speed };//change velocity and direction
-            b2Body_SetLinearVelocity(ID, vel);
+            b2Vec2 vel = { (dx / dist) * m_speed*50, (dy / dist) * m_speed * 50 };//change velocity and direction
+            b2Body_ApplyLinearImpulseToCenter(ID, vel, true);
         }
         else {
-            ishoming = false;//else make it no longer home
+            if (!owner->EnemyInRadius.empty()) {//if there was another enemy
+                Target = owner->EnemyInRadius.at(0);//aim for that instead
+            }
+            else {
+                ishoming = false;//else make it no longer home
+            }
+           
         }
     }
 
@@ -138,7 +145,7 @@ void Projectile::Process(float deltaTime)
         if (B2_ID_EQUALS(shapeId, beginTouch->sensorShapeId)) {//CHECK IF THE SENSOR EVENT IS RELEVANT 
             void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);//get the object its colliding with
             Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);
-            NewEnemy->TurnBlue();
+            //NewEnemy->TurnBlue();
             NewEnemy->TakeDamage(damage);
             if (effect != -1) {//if projectile has an effect
                 NewEnemy->TakeEffect(effect);
