@@ -82,7 +82,7 @@ SceneGame::SceneGame()
 
 SceneGame::~SceneGame()
 {
-    delete list;
+        delete list;
     delete pathmaker;
     delete m_pCentre;
     m_pCentre = 0;

@@ -156,6 +156,14 @@ void Tower::Process(float deltaTime)
 
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
+    if (!EnemyInRadius.empty()) {
+        m_pSprite->SetAngle(
+                atan2(
+                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).y - m_y),
+                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).x - m_x)
+                    ) * (180 / M_PI));
+    }
+    
 }
 
 void Tower::Draw(Renderer& renderer)

@@ -47,7 +47,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
 
     maxenemies = Parser.GetValueAsInt(ProjectileID + "|Pierce");//set amount of enemies it can hit
     damage = Parser.GetValueAsInt(ProjectileID + "|Damage");
-    ishoming = Parser.GetValueAsBoolean(ProjectileID + "|Homing");//if its homing or not
+    ishoming = Parser.GetValueAsInt(ProjectileID + "|Homing");//if its homing or not
     effect = Parser.GetValueAsInt(ProjectileID + "|Effect");
     
     string SpritePath = "..\\assets\\projectiles\\" + Parser.GetValueAsString(ProjectileID + "|Sprite") + ".png";
@@ -59,7 +59,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     this->Target = Target;//what it should hit 
     m_speed = 300.0f*speed;//speed of it
 
-
+  
 
     // Box2D body setup
     b2BodyDef WorldObj = b2DefaultBodyDef();
@@ -97,6 +97,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
 
 void Projectile::Process(float deltaTime)
 {
+    
     m_x = b2Body_GetPosition(ID).x;
     m_y = b2Body_GetPosition(ID).y;
 
@@ -142,6 +143,7 @@ void Projectile::Process(float deltaTime)
 
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
+    m_pSprite->SetAngle(atan2(b2Body_GetLinearVelocity(ID).y, b2Body_GetLinearVelocity(ID).x) * (180 / M_PI));
 }
 
 void Projectile::Draw(Renderer& renderer)
@@ -164,9 +166,12 @@ bool Projectile::GetAlive() {
         return(false);//return false (dead)
     }
     //if in bounds, just return 
-    if (maxenemies <= 0) {
+    else if (maxenemies <= 0) {
         std::cout << "out of pierce!\n";
         return false;
     }
-    return true;
+    else {
+        return true;
+    }
+    
 }
