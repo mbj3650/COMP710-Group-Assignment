@@ -22,23 +22,26 @@ bool IniParser::LoadIniFile(const std::string& filename)
 	ifstream Reader(filename);
 	string sectionname = "";
 	while (getline(Reader, Text)) {
-		// Output the text from the file
-		if (Text.at(0) == '[')//a [ indicates a section name like [name]
-		{//if new section then get the new name
-			Text.erase(Text.begin() + 0);
-			Text.erase(Text.end()-1);
-			sectionname = Text;
-		}
-		else {//IF ITS NOT A SECTION, ASSUME ITS A VALUE SO WE CAN ADD TO I
-			string valuename = Text.substr(0, Text.find('=')); //split at "|"
-			string valuevalue = Text.substr(Text.find('=') + 1, Text.find('=')); //split at "="
+		if (!Text.empty()) {//if line isnt empty
+			// Output the text from the file
+			if (Text.at(0) == '[')//a [ indicates a section name like [name]
+			{//if new section then get the new name
+				Text.erase(Text.begin() + 0);
+				Text.erase(Text.end() - 1);
+				sectionname = Text;
+			}
+			else {//IF ITS NOT A SECTION, ASSUME ITS A VALUE SO WE CAN ADD TO I
+				string valuename = Text.substr(0, Text.find('=')); //split at "|"
+				string valuevalue = Text.substr(Text.find('=') + 1, Text.find('=')); //split at "="
 
-			string namevalue = "";
-			namevalue.append(sectionname + "|" + valuename);
+				string namevalue = "";
+				namevalue.append(sectionname + "|" + valuename);
 
-			layout.insert({ namevalue, valuevalue });//add valuename and then actual value  
-			std::cout << "name:" << namevalue << "\nvalue:" << valuevalue << "\n";
+				layout.insert({ namevalue, valuevalue });//add valuename and then actual value  
+				//std::cout << "name:" << namevalue << "\nvalue:" << valuevalue << "\n";
+			}
 		}
+		
 	
 	}
 	Reader.close();

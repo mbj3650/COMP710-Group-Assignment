@@ -68,6 +68,7 @@ private:
     //information for the projectile
     std::string projectileID;
     bool canhome;
+    int Price;
     float range;
     float speed;    
     float firedelay;

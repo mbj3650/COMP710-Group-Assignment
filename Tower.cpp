@@ -48,9 +48,9 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
 
     //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
     projectileID = Parser.GetValueAsString(TowerID + "|ProjectileID");
-    speed = Parser.GetValueAsInt(TowerID + "|Speed");
-    range = Parser.GetValueAsInt(TowerID + "|Range");
-    firedelay = Parser.GetValueAsInt(TowerID + "|Firerate");
+    speed = Parser.GetValueAsFloat(TowerID + "|Speed");
+    range = Parser.GetValueAsFloat(TowerID + "|Range");
+    firedelay = Parser.GetValueAsFloat(TowerID + "|Firerate");
     firetimer = firedelay;
     canhome = false;
     m_projectiles = &projectileaddress;

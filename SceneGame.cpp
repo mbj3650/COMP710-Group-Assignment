@@ -372,7 +372,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
             if (list->Hovered->hastower == false) {
                 Tower* newTower = new Tower();
-                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, "Shoot");
+                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, "Cold");
                 m_towers.push_back(newTower);
             }
         }
