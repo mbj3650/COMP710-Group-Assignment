@@ -25,6 +25,7 @@
     <ClCompile Include="DynamicText.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="IniParser.cpp" />
     <ClCompile Include="inputsystem.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
     <ClCompile Include="lib\imgui\imgui_demo.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="EconomyConfig.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="IniParser.h" />
     <ClInclude Include="inlinehelpers.h" />
     <ClInclude Include="inputsystem.h" />
     <ClInclude Include="lib\imgui\imconfig.h" />

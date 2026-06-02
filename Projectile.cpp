@@ -13,6 +13,7 @@
 #include <iostream>
 #include <box2d.h>
 #include "Tower.h"
+#include "IniParser.h"
 
 Projectile::Projectile()
 {
@@ -33,24 +34,28 @@ Projectile::~Projectile()
 }
 
 
-bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2WorldId WorldID, b2ShapeId Target, bool Homing, int pierce,int damage, float speed)
+bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2WorldId WorldID, b2ShapeId Target, std::string ProjectileID, float speed)
 {
     m_tileSize = tileSize;
-
+    IniParser Parser;
+    Parser.LoadIniFile("..\\assets\\info\\projectile.ini");
     m_x = owner->GetX();
     m_y = owner->GetY();
 
     max_x = renderer.GetWidth();
     max_y = renderer.GetHeight();
 
-    maxenemies = pierce;//set amount of enemies it can hit
-    m_pSprite = renderer.CreateSprite("..\\assets\\ball.png");
+    maxenemies = Parser.GetValueAsInt(ProjectileID + "|Pierce");//set amount of enemies it can hit
+    damage = Parser.GetValueAsInt(ProjectileID + "|Damage");
+    ishoming = Parser.GetValueAsBoolean(ProjectileID + "|Homing");//if its homing or not
+    effect = Parser.GetValueAsInt(ProjectileID + "|Effect");
+    
+    string SpritePath = "..\\assets\\projectiles\\" + Parser.GetValueAsString(ProjectileID + "|Sprite") + ".png";
+    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
     float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);
 
-    this->damage = damage;
-    ishoming = Homing;//if its homing or not
     this->Target = Target;//what it should hit 
     m_speed = 300.0f*speed;//speed of it
 
@@ -88,6 +93,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
 
     return true;
 }
+
 
 void Projectile::Process(float deltaTime)
 {

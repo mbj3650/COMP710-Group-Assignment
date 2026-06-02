@@ -3,7 +3,7 @@
 #ifndef PROJECTILE_H
 #define PROJECTILE_H
 #include <box2d.h>
-
+#include <string>
 class Renderer;
 class Sprite;
 class Tile;
@@ -20,8 +20,8 @@ public:
 
   
 
-    // owner of tower for boomerang projectlies, target to aim towards, if not homing, travel in straight line else travel towards the target
-    bool Initialise(Renderer& renderer, Tower* owner, float tileSize, b2WorldId WorldID, b2ShapeId Target, bool Homing, int pierce, int damage, float speed);
+    // give owner of tower for boomeranging projectlies, shapeid is the enemy target to aim towards, if not homing, travel in straight line else travel towards the target
+    bool Initialise(Renderer& renderer, Tower* owner, float tileSize, b2WorldId WorldID, b2ShapeId Target, std::string ProjectileID, float speed);
     void Process(float deltaTime);
     void Draw(Renderer& renderer);
 
@@ -52,6 +52,7 @@ private:
     bool ishoming;//if it should constantly travel towards a target or not
     int maxenemies = 1;//can only hit one enemy by default, we can set this higher or lower to hit more or less enemies
     int damage;
+    int effect;
     b2ShapeId Target;//NOTE: Please do not make a projectile both pierce and homing at this time
 };
 

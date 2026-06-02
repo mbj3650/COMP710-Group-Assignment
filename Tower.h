@@ -4,6 +4,7 @@
 
 #include <box2d.h>
 #include <vector>
+#include <string>
 
 // Forward declarations:
 class Renderer;
@@ -24,7 +25,7 @@ public:
     Tower();
     ~Tower();
 
-    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, float firedelay, int pierceamount, int damage, float speed);
+    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, std::string TowerID);
 
     void Process(float deltaTime);
     void Draw(Renderer& renderer);
@@ -65,12 +66,12 @@ private:
     float m_tileSize;
 
     //information for the projectile
+    std::string projectileID;
     bool canhome;
-    int pierceamount;
-    int damage;
-    float speed;
-    float firetimer;
+    float range;
+    float speed;    
     float firedelay;
+    float firetimer;
 };
 
 #endif // __TOWER_H__

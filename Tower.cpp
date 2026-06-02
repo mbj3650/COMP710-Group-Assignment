@@ -11,6 +11,8 @@
 #include <box2d.h>
 #include "Enemy.h"
 #include <algorithm>
+#include "string.h"
+#include "IniParser.h"
 Tower::Tower()
 {
     m_pSprite = 0;
@@ -30,7 +32,7 @@ Tower::~Tower()
     m_pSprite = 0;
 }
 
-bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, float firedelay,int pierceamount,int damage,float speed)
+bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, std::string TowerID)
 {
     m_renderer = &renderer;
     assert(startTile);
@@ -39,12 +41,17 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     m_pCurrentTile = startTile;
 
 
+    IniParser Parser;
+    Parser.LoadIniFile("..\\assets\\info\\tower.ini");
+
+    
+
     //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
-    this->pierceamount = pierceamount;
-    this->damage = damage;
-    this->firedelay = firedelay;
+    projectileID = Parser.GetValueAsString(TowerID + "|ProjectileID");
+    speed = Parser.GetValueAsInt(TowerID + "|Speed");
+    range = Parser.GetValueAsInt(TowerID + "|Range");
+    firedelay = Parser.GetValueAsInt(TowerID + "|Firerate");
     firetimer = firedelay;
-    this->speed = speed;
     canhome = false;
     m_projectiles = &projectileaddress;
 
@@ -66,7 +73,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     //b2Polygon box = b2MakeRoundedBox(6 * scale, 6 * scale, 5.0f);
     b2Circle circleShape;//make circle radius
     circleShape.center = { 0,0 };
-    circleShape.radius = 200;
+    circleShape.radius = 100*range;
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.density = 1.0f;
     shapeDef.friction = 0.1f;
@@ -136,7 +143,7 @@ void Tower::Process(float deltaTime)
     else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
         std::cout << "firing!\n";
         Projectile* newprojectile = new Projectile();//make new projectile
-        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), canhome, pierceamount, damage, speed);//add to it
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
         m_projectiles->push_back(newprojectile);//
         firetimer = firedelay;
     }
