@@ -24,7 +24,7 @@ Projectile::Projectile()
 
 Projectile::~Projectile()
 {
-    std::cout << "Erased shape!\n";
+    //std::cout << "Erased shape!\n";
     if (b2Body_IsValid(ID))
     {
         b2DestroyBody(ID);
@@ -170,7 +170,7 @@ bool Projectile::GetAlive() {
         || (m_y < 0- m_pSprite->GetHeight())
         ) //if out of bounds
     {
-        std::cout << "out of bounds!\n";
+       // std::cout << "out of bounds!\n";
         return(false);//return false (dead)
     }
     else if (lifetime <= 0 && lifetime > -1) {//if lifetime doesnt equal -1 and lifetime is dead
@@ -179,7 +179,7 @@ bool Projectile::GetAlive() {
 
     //if in bounds, just return 
     else if (maxenemies <= 0) {
-        std::cout << "out of pierce!\n";
+       // std::cout << "out of pierce!\n";
         return false;
     }
     else {

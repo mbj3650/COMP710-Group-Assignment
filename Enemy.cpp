@@ -11,6 +11,7 @@
 #include <cassert>
 #include <iostream>
 #include <box2d.h>
+#include "IniParser.h"
 
 Enemy::Enemy()
 {
@@ -37,21 +38,32 @@ Enemy::~Enemy()
 }
 
 bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
-                       b2WorldId WorldID, int waveNumber)
+                       b2WorldId WorldID, int waveNumber, std::string EnemyID)
 {
     assert(startTile);
+
+    IniParser Parser;
+    Parser.LoadIniFile("..\\assets\\info\\enemy.ini");
 
     m_tileSize     = tileSize;
     m_pCurrentTile = startTile;
 
     // HP scales with wave: wave 1 = 3 HP, wave 2 = 5 HP, wave 3 = 7 HP, etc.
-    m_iMaxHP = 1 + waveNumber * 2;
+    int health_bonus = Parser.GetValueAsInt(EnemyID + "|BonusHealth");
+    m_iMaxHP = health_bonus + 1 + waveNumber * 2 ;
     m_iHP    = m_iMaxHP;
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
 
     m_pSprite = renderer.CreateSprite("..\\assets\\ball.png");
+
+   
+    m_damage = Parser.GetValueAsInt(EnemyID + "|Damage");
+    m_speed *= Parser.GetValueAsFloat(EnemyID + "|Speed");//multiply the speed so they can move faster or slower
+
+    std::string SpritePath = "..\\assets\\projectiles\\" + Parser.GetValueAsString(EnemyID + "|Sprite") + ".png";
+    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
     float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);

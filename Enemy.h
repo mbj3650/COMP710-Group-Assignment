@@ -8,7 +8,7 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 #include <box2d.h>
-
+#include <string>
 class Renderer;
 class Sprite;
 class Tile;
@@ -23,8 +23,7 @@ public:
     ~Enemy();
 
     // waveNumber scales the enemy's starting HP (wave 1 = 3HP, wave 2 = 5HP, etc.)
-    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize,
-                    b2WorldId WorldID, int waveNumber = 1);
+    bool Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, int waveNumber = 1, std::string EnemyID = "Basic");
     void Process(float deltaTime);
     void TurnRed();
     void TurnBlue();
@@ -45,6 +44,7 @@ public:
     float GetX() const { return m_x; }
     float GetY() const { return m_y; }
 
+    int  GetDamage()   const { return m_damage; }
 private:
     Enemy(const Enemy&);
     Enemy& operator=(const Enemy&);
@@ -66,6 +66,7 @@ private:
     int m_iHP;
     int m_iMaxHP;
 
+    int m_damage;//damage it deals upon reaching end
 
     //effects
     float poisontimer;

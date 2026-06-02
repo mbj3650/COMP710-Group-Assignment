@@ -387,7 +387,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         {
             m_fSpawnTimer = 0.0f;
             Enemy* e = new Enemy();
-            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave);
+            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Basic");
             m_enemies.push_back(e);
             m_iEnemiesToSpawn--;
 
@@ -441,9 +441,10 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             if (m_enemies[i]->HasReachedEnd())
             {
                 SpawnBurst(m_enemies[i]->GetX(), m_enemies[i]->GetY());
+                m_iLives-= m_enemies[i]->GetDamage();
                 delete m_enemies[i];
                 m_enemies.erase(m_enemies.begin() + i);
-                m_iLives--;
+                
                 m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
 
                 if (m_iLives <= 0)
