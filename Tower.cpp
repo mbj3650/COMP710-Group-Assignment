@@ -12,7 +12,8 @@
 #include "Enemy.h"
 #include <algorithm>
 #include "string.h"
-#include "IniParser.h"
+#include "GameData.h"
+#include "TowerData.h"
 #include "EconomyConfig.h" // tower attack radius config
 Tower::Tower()
 {
@@ -41,27 +42,23 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     m_tileSize = tileSize;
     m_pCurrentTile = startTile;
 
+	TowerData data = GameData::Get().Tower[TowerID];
+    projectileID = data.ProjectileID;
+	speed = data.Speed;
+	range = data.Range;
+	firedelay = data.Firerate;
+    firetimer = firedelay;
+	towerID = TowerID;
 
-    IniParser Parser;
-    Parser.LoadIniFile("..\\assets\\info\\tower.ini");
-
-    
+    string SpritePath = "..\\assets\\towers\\" + data.Sprite + ".png";
+    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
     //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
-    projectileID = Parser.GetValueAsString(TowerID + "|ProjectileID");
-    speed = Parser.GetValueAsFloat(TowerID + "|Speed");
-    range = Parser.GetValueAsFloat(TowerID + "|Range");
-    firedelay = Parser.GetValueAsFloat(TowerID + "|Firerate");
-    firetimer = firedelay;
     canhome = false;
     m_projectiles = &projectileaddress;
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
-
-    string SpritePath = "..\\assets\\towers\\" + Parser.GetValueAsString(TowerID + "|Sprite") + ".png";
-    std::cout << "SPRITE:" << Parser.GetValueAsString(TowerID + "|Sprite");
-    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
     float scale = (tileSize * 0.95f) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);
@@ -174,4 +171,14 @@ void Tower::Process(float deltaTime)
 void Tower::Draw(Renderer& renderer)
 {
         m_pSprite->Draw(renderer);
+}
+
+void Tower::Sell()
+{
+	m_bSelling = true;
+}
+
+int Tower::GetSellValue() const
+{
+    return Price / 2;
 }

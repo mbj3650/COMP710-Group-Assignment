@@ -29,6 +29,7 @@ bool IniParser::LoadIniFile(const std::string& filename)
 				Text.erase(Text.begin() + 0);
 				Text.erase(Text.end() - 1);
 				sectionname = Text;
+				sections.push_back(sectionname);//add section to list of sections
 			}
 			else {//IF ITS NOT A SECTION, ASSUME ITS A VALUE SO WE CAN ADD TO I
 				string valuename = Text.substr(0, Text.find('=')); //split at "|"

@@ -59,9 +59,18 @@ DynamicText::SetText(Renderer& renderer, const std::string& text)
     m_pSprite->Initialise(*m_pTexture);
 
     if (m_pSprite)
-    {
-        m_pSprite->SetX(static_cast<int>(m_x));
-        m_pSprite->SetY(static_cast<int>(m_y));
+    { 
+        if (m_bCentre)
+        {
+            m_pSprite->SetX(static_cast<int>(m_x));
+            m_pSprite->SetY(static_cast<int>(m_y));
+        }
+        else
+        {
+            m_pSprite->SetX(static_cast<int>(m_x) + m_pSprite->GetWidth() / 2);
+            m_pSprite->SetY(static_cast<int>(m_y) + m_pSprite->GetHeight() / 2);
+        }
+
     }
 }
 
