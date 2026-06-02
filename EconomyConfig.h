@@ -54,4 +54,15 @@ const int PICKAXETHROWER_UPGRADE_1 = 150;  const int PICKAXETHROWER_UPGRADE_2 = 
 const int PULSEBOT_UPGRADE_1       = 170;  const int PULSEBOT_UPGRADE_2       = 280;
 const int DEMOMAN_UPGRADE_1        = 240;  const int DEMOMAN_UPGRADE_2        = 400;
 
+// -------------------------------------------------------
+// Tower attack radius
+// -------------------------------------------------------
+// Attack radius is expressed in TILES, so it scales with the grid instead of
+// being a magic pixel value. The tower converts it to world units with:
+//     radius_world = TOWER_RADIUS_TILES_DEFAULT * tileSize
+// This is the shared default; per-tower radii can be added later (the design
+// doc wants each tower to have its own float radius) by passing a value into
+// Tower::Initialise instead of using this default.
+const float TOWER_RADIUS_TILES_DEFAULT = 2.5f; // ~2-3 tiles in every direction
+
 #endif // ECONOMYCONFIG_H
