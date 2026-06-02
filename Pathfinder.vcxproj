@@ -24,6 +24,8 @@
     <ClCompile Include="common_platform.cpp" />
     <ClCompile Include="DynamicText.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyData.cpp" />
+    <ClCompile Include="EnemyData.h" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="IniParser.cpp" />

@@ -393,6 +393,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
                     newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, UIShopManager::GetInstance().GetSelectedTowerType());
                     m_towers.push_back(newTower);
 					UIShopManager::GetInstance().UpdateSelection(-1); // deselect
+                    UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, newTower);
                 }
                 else
                 {
@@ -405,6 +406,11 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
                     return tower->GetCurrentTile() == list->Hovered; // return tower's curerent tile is same as hovered
                 });
                 if (iter != m_towers.end()) UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, *iter); // making sure it was found
+            }
+            else if (!list->Hovered->hastower && !UIShopManager::GetInstance().IsTowerSelected() && !UIShopManager::GetInstance().IsAnyElementHovered(inputSystem))
+            {
+                // Deselects sidepanel if you clicked on anything
+                UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, 0);
             }
         }
 
@@ -419,7 +425,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         {
             m_fSpawnTimer = 0.0f;
             Enemy* e = new Enemy();
-            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave);
+            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Basic");
             m_enemies.push_back(e);
             m_iEnemiesToSpawn--;
 
@@ -432,6 +438,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             // Selling
             if (m_towers[i]->IsSold())
             {
+                m_towers[i]->GetCurrentTile()->hastower = false;
                 AddGold(m_towers[i]->GetSellValue()); // refund half the tower's price
                 delete m_towers[i];
                 m_towers.erase(m_towers.begin() + i);
@@ -481,9 +488,10 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             if (m_enemies[i]->HasReachedEnd())
             {
                 SpawnBurst(m_enemies[i]->GetX(), m_enemies[i]->GetY());
+                m_iLives-= m_enemies[i]->GetDamage();
                 delete m_enemies[i];
                 m_enemies.erase(m_enemies.begin() + i);
-                m_iLives--;
+                
                 m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
 
                 if (m_iLives <= 0)

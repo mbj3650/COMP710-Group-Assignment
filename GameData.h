@@ -5,6 +5,7 @@
 using namespace std;
 class ProjectileData;
 class TowerData;
+class EnemyData;
 class GameData
 {
 public:
@@ -17,8 +18,10 @@ public:
 	void Initialise();
 	void LoadTowerData();
 	void LoadProjectileData();
+	void LoadEnemyData();
 	map<string, TowerData> Tower;
 	map<string, ProjectileData> Projectile;
+	map<string, EnemyData> Enemy;
 protected:
 	static GameData* sm_pInstance;
 private:

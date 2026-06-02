@@ -1,6 +1,7 @@
 #include "GameData.h"
 #include "ProjectileData.h"
 #include "TowerData.h"
+#include "EnemyData.h"
 #include "IniParser.h"
 #include <map>
 #include <string>
@@ -35,6 +36,7 @@ void GameData::Initialise()
 {
 	LoadTowerData();
 	LoadProjectileData();
+	LoadEnemyData();
 }
 void GameData::LoadTowerData()
 {
@@ -65,6 +67,21 @@ void GameData::LoadProjectileData()
 		Parser.GetValueAsInt(section + "|Homing"),
 		Parser.GetValueAsInt(section + "|Effect"),
 		Parser.GetValueAsInt(section + "|Lifetime")
+		)});
+	}
+}
+void GameData::LoadEnemyData()
+{
+	IniParser Parser;
+	Parser.LoadIniFile("..\\assets\\info\\enemy.ini");
+	for (const string section : Parser.sections)
+	{
+		Enemy.insert({ section, EnemyData(
+		Parser.GetValueAsString(section + "|Sprite"),
+		Parser.GetValueAsInt(section + "|Price"),
+		Parser.GetValueAsInt(section + "|Damage"),
+		Parser.GetValueAsFloat(section + "|Speed"),
+		Parser.GetValueAsInt(section + "|BonusHealth")
 		)});
 	}
 }

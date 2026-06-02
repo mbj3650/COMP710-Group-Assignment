@@ -54,7 +54,7 @@ void UISidepanel::Initialise(Renderer& renderer)
 void UISidepanel::Process(float deltaTime, InputSystem& input)
 {
 	// if we have a tower in sidepanel, and mouse clicks on sell button
-	if (m_pSidepanelTower && IsSpriteHovered(m_pPanelSprite, input) && input.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED)
+	if (m_pSidepanelTower && IsSpriteHovered(m_pSellSprite, input) && input.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED)
 	{
 		m_pSidepanelTower->Sell();
 		m_pSidepanelTower = 0;
@@ -76,7 +76,7 @@ void UISidepanel::Draw(Renderer& renderer)
 
 bool UISidepanel::IsElementHovered(InputSystem& input) const
 {
-	return IsSpriteHovered(m_pSellSprite, input);
+	return IsSpriteHovered(m_pPanelSprite, input);
 }
 
 bool UISidepanel::IsSpriteHovered(Sprite* sprite, InputSystem& input) const
@@ -96,6 +96,11 @@ void UISidepanel::SetTower(Renderer& renderer, Tower* tower)
 	{
 		m_pSidepanelTower = tower;
 		m_pTowerTitle->SetText(renderer, tower->GetTowerID());
+	}
+	else
+	{
+		m_pSidepanelTower = 0;
+		m_pTowerTitle->SetText(renderer, " ");
 	}
 	
 

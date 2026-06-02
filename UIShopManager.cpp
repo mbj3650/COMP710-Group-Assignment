@@ -112,6 +112,7 @@ bool UIShopManager::IsAnyElementHovered(InputSystem& input) const
 			return true;
 		}
 	}
+	if (m_pSidePanel->IsElementHovered(input)) return true;
 	return false;
 }
 
