@@ -53,6 +53,7 @@ private:
     int maxenemies = 1;//can only hit one enemy by default, we can set this higher or lower to hit more or less enemies
     int damage;
     int effect;
+    float lifetime;
     b2ShapeId Target;//NOTE: Please do not make a projectile both pierce and homing at this time
 };
 

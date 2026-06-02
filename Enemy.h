@@ -38,6 +38,9 @@ public:
     int  GetHP()      const { return m_iHP; }
     int  GetMaxHP()   const { return m_iMaxHP; }
 
+    //effect system
+    void TakeEffect(int amount);
+
     // Position accessors -- used by SceneGame to spawn particle bursts
     float GetX() const { return m_x; }
     float GetY() const { return m_y; }
@@ -62,6 +65,12 @@ private:
     // HP
     int m_iHP;
     int m_iMaxHP;
+
+
+    //effects
+    float poisontimer;
+    int poisoncount;
+    float slowtimer;
 };
 
 #endif // ENEMY_H

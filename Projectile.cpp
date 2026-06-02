@@ -57,9 +57,9 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     m_pSprite->SetScale(scale);
 
     this->Target = Target;//what it should hit 
-    m_speed = 300.0f*speed;//speed of it
+    m_speed = 500.0f*speed;//speed of it
 
-  
+    lifetime = Parser.GetValueAsInt(ProjectileID + "|Lifetime");
 
     // Box2D body setup
     b2BodyDef WorldObj = b2DefaultBodyDef();
@@ -68,7 +68,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     b2Body_SetType(ID, b2_dynamicBody);
     b2Body_SetUserData(ID, this);
 
-    b2Polygon box = b2MakeRoundedBox(6 * scale, 6 * scale, 5.0f);
+    b2Polygon box = b2MakeRoundedBox(9 * scale, 9 * scale, 9.0f);
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.density = 1.0f;
     shapeDef.friction = 0.1f;
@@ -122,6 +122,11 @@ void Projectile::Process(float deltaTime)
         }
     }
 
+    if (lifetime != -1) {
+        if (lifetime > 0) {
+            lifetime -= deltaTime;
+        }
+    }
 
    //THIS CHECKS IF PROJCETILE HAS BEGUN INTERSECTING WITH ENEMY!
     b2SensorEvents sensorEvents = b2World_GetSensorEvents(b2Shape_GetWorld(shapeId));//get all the sensor events
@@ -135,6 +140,9 @@ void Projectile::Process(float deltaTime)
             Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);
             NewEnemy->TurnBlue();
             NewEnemy->TakeDamage(damage);
+            if (effect != -1) {//if projectile has an effect
+                NewEnemy->TakeEffect(effect);
+            }
             maxenemies--;//decrement max amount of enemies it can hit by 1
         } 
 
@@ -143,7 +151,7 @@ void Projectile::Process(float deltaTime)
 
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
-    m_pSprite->SetAngle(atan2(b2Body_GetLinearVelocity(ID).y, b2Body_GetLinearVelocity(ID).x) * (180 / M_PI));
+    m_pSprite->SetAngle(atan2(b2Body_GetLinearVelocity(ID).x, b2Body_GetLinearVelocity(ID).y) * (180 / M_PI));
 }
 
 void Projectile::Draw(Renderer& renderer)
@@ -165,6 +173,10 @@ bool Projectile::GetAlive() {
         std::cout << "out of bounds!\n";
         return(false);//return false (dead)
     }
+    else if (lifetime <= 0 && lifetime > -1) {//if lifetime doesnt equal -1 and lifetime is dead
+        return false;
+    }
+
     //if in bounds, just return 
     else if (maxenemies <= 0) {
         std::cout << "out of pierce!\n";

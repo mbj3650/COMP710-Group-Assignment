@@ -58,9 +58,11 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
 
-    m_pSprite = renderer.CreateSprite("..\\assets\\ball.png");
+    string SpritePath = "..\\assets\\towers\\" + Parser.GetValueAsString(TowerID + "|Sprite") + ".png";
+    std::cout << "SPRITE:" << Parser.GetValueAsString(TowerID + "|Sprite");
+    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
-    float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
+    float scale = (tileSize * 0.95f) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);
 
     // Box2D sensor setup
@@ -159,8 +161,8 @@ void Tower::Process(float deltaTime)
     if (!EnemyInRadius.empty()) {
         m_pSprite->SetAngle(
                 atan2(
-                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).y - m_y),
-                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).x - m_x)
+                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).x - m_x),
+                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).y - m_y)
                     ) * (180 / M_PI));
     }
     

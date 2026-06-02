@@ -32,8 +32,8 @@ bool IniParser::LoadIniFile(const std::string& filename)
 			}
 			else {//IF ITS NOT A SECTION, ASSUME ITS A VALUE SO WE CAN ADD TO I
 				string valuename = Text.substr(0, Text.find('=')); //split at "|"
-				string valuevalue = Text.substr(Text.find('=') + 1, Text.find('=')); //split at "="
-
+				string valuevalue = Text.substr(Text.find('=') + 1); //split at "="
+				//std::cout << valuevalue << "\n";
 				string namevalue = "";
 				namevalue.append(sectionname + "|" + valuename);
 

@@ -84,6 +84,24 @@ void Enemy::TakeDamage(int amount)
     if (m_iHP < 0) m_iHP = 0;
 }
 
+
+void Enemy::TakeEffect(int effect)
+{
+    enum Effects {
+        FROST,
+        POISON,
+    };
+    switch (effect) {
+        case FROST:
+            slowtimer = 2;
+            break;
+        case POISON:
+            poisoncount += 3;//make it stackable instead of capping it
+            poisontimer = 0.5;
+            break;
+    }
+}
+
 void Enemy::Process(float deltaTime)
 {
     m_x = b2Body_GetPosition(ID).x;
@@ -101,6 +119,25 @@ void Enemy::Process(float deltaTime)
         m_bReachedEnd = true;
         return;
     }
+
+    //EFFECT TIMERS
+    if (slowtimer > 0) {
+        slowtimer -= deltaTime;
+    }
+    if (poisoncount > 0) {//if needs to be poisoned
+        if (poisontimer > 0) {//if poisontimer is greater than 0
+            poisontimer -= deltaTime;//decrease until 0 or less
+        }
+        else {//if poison timer is 0 then take damage
+            TakeDamage(1);
+            poisontimer = 0.5;//reset timer
+            poisoncount--;//reduce poisoncount(ticks) by 1
+        }
+    }
+
+
+
+
 
     float targetX = nextTile->Position.x * m_tileSize + m_tileSize * 0.5f;
     float targetY = nextTile->Position.y * m_tileSize + m_tileSize * 0.5f;
@@ -120,7 +157,10 @@ void Enemy::Process(float deltaTime)
     }
     else
     {
-        b2Vec2 vel = { (dx / dist) * m_speed, (dy / dist) * m_speed };
+        b2Vec2 vel = { (dx / dist) * m_speed, (dy / dist) * m_speed };//set speed
+        if (slowtimer > 0) {//if slow
+            vel = { vel.x * 0.5f, vel.y * 0.5f };//halve speed instead
+        }    
         b2Body_SetLinearVelocity(ID, vel);
     }
 
