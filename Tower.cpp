@@ -4,12 +4,15 @@
 #include "Tile.h"
 #include "sprite.h"
 #include "renderer.h"
+#include "projectile.h"
 #include <cmath>
 #include <cassert>
 #include <iostream>
 #include <box2d.h>
 #include "Enemy.h"
 #include <algorithm>
+#include "string.h"
+#include "IniParser.h"
 #include "EconomyConfig.h" // tower attack radius config
 Tower::Tower()
 {
@@ -30,20 +33,37 @@ Tower::~Tower()
     m_pSprite = 0;
 }
 
-bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
-    b2WorldId WorldID)
+bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, std::string TowerID)
 {
+    m_renderer = &renderer;
     assert(startTile);
     startTile->hastower = true;//set it to true so we cant place another tower on it
     m_tileSize = tileSize;
     m_pCurrentTile = startTile;
 
+
+    IniParser Parser;
+    Parser.LoadIniFile("..\\assets\\info\\tower.ini");
+
+    
+
+    //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
+    projectileID = Parser.GetValueAsString(TowerID + "|ProjectileID");
+    speed = Parser.GetValueAsFloat(TowerID + "|Speed");
+    range = Parser.GetValueAsFloat(TowerID + "|Range");
+    firedelay = Parser.GetValueAsFloat(TowerID + "|Firerate");
+    firetimer = firedelay;
+    canhome = false;
+    m_projectiles = &projectileaddress;
+
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
 
-    m_pSprite = renderer.CreateSprite("..\\assets\\ball.png");
+    string SpritePath = "..\\assets\\towers\\" + Parser.GetValueAsString(TowerID + "|Sprite") + ".png";
+    std::cout << "SPRITE:" << Parser.GetValueAsString(TowerID + "|Sprite");
+    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
-    float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
+    float scale = (tileSize * 0.95f) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);
 
     // Box2D sensor setup
@@ -58,7 +78,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     circleShape.center = { 0,0 };
     // Radius now scales with the tile size instead of a hardcoded 200px.
     // Tune the default in EconomyConfig.h (TOWER_RADIUS_TILES_DEFAULT).
-    circleShape.radius = TOWER_RADIUS_TILES_DEFAULT * m_tileSize;
+    circleShape.radius = TOWER_RADIUS_TILES_DEFAULT * m_tileSize*range;
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.density = 1.0f;
     shapeDef.friction = 0.1f;
@@ -122,12 +142,33 @@ void Tower::Process(float deltaTime)
        
     }
 
+    if (firetimer > 0) {//decrease timer
+        firetimer -= deltaTime;
+    }
+    else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
+        std::cout << "firing!\n";
+        Projectile* newprojectile = new Projectile();//make new projectile
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
+        m_projectiles->push_back(newprojectile);//
+        firetimer = firedelay;
+    }
+
+
+
 
     m_x = b2Body_GetPosition(ID).x;
     m_y = b2Body_GetPosition(ID).y;
 
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
+    if (!EnemyInRadius.empty()) {
+        m_pSprite->SetAngle(
+                atan2(
+                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).x - m_x),
+                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).y - m_y)
+                    ) * (180 / M_PI));
+    }
+    
 }
 
 void Tower::Draw(Renderer& renderer)

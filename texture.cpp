@@ -116,6 +116,7 @@ Texture::LoadTextTexture(const char* text, const char* fontname, int pointsize)
 	LoadSurfaceIntoTexture(pSurface);
 	TTF_CloseFont(pFont);
 	pFont = 0;
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 }
 
 
