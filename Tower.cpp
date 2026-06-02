@@ -102,7 +102,7 @@ void Tower::Process(float deltaTime)
         if (!b2Shape_IsValid(EnemyInRadius.at(z))) {//if enemy shape is null
             EnemyInRadius.erase(EnemyInRadius.begin() + z);//erase it from memory
             z--;//reduce i by 1 so it doesnt risk skipping over certain enemies
-            std::cout << "Removed Enemy reached end!\n";
+           // std::cout << "Removed Enemy reached end!\n";
         }
     }
     for (int i = 0; i < sensorEvents.beginCount; ++i)//go through all events where the shape is beginning to collide
@@ -112,7 +112,7 @@ void Tower::Process(float deltaTime)
             void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);//get the object its colliding with
             Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);
             EnemyInRadius.push_back(beginTouch->visitorShapeId);//add enemy to list of enemies in radius
-            NewEnemy->TurnRed();
+            //NewEnemy->TurnRed();
         }
        
     }
@@ -122,11 +122,11 @@ void Tower::Process(float deltaTime)
         b2SensorEndTouchEvent* endTouch = sensorEvents.endEvents + i;//get the endevent 
         if (B2_ID_EQUALS(shapeId, endTouch->sensorShapeId)) {//CHECK IF THE SENSOR EVENT IS RELEVANT 
             if (b2Shape_IsValid(endTouch->visitorShapeId)) {
-                std::cout << b2Shape_GetUserData(shapeId) << "Removed Enemy left radius!\n";
+               // std::cout << b2Shape_GetUserData(shapeId) << "Removed Enemy left radius!\n";
                 void* myUserData = b2Shape_GetUserData(endTouch->visitorShapeId);//get the object its colliding with
 
                 Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);//turn to enemy
-                NewEnemy->TurnBlue();
+                //NewEnemy->TurnBlue();
                 for (int i = 0; i < EnemyInRadius.size(); i++) {
                     if (B2_ID_EQUALS(EnemyInRadius.at(i), endTouch->visitorShapeId)) {
                         EnemyInRadius.erase(EnemyInRadius.begin() + i);//remove from list of enemies in range

@@ -35,8 +35,10 @@ private:
     Projectile(const Projectile&);
     Projectile& operator=(const Projectile&);
 
+    //internal information
     Sprite* m_pSprite;
     Tile* m_pCurrentTile;
+    Tower* owner;
 
     b2BodyId  ID;
     b2ShapeId shapeId;

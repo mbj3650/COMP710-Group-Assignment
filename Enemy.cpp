@@ -29,7 +29,7 @@ Enemy::Enemy()
 
 Enemy::~Enemy()
 {
-    std::cout << "Erased shape!\n";
+    std::cout << "Erased Enemy!\n";
     if (b2Body_IsValid(ID))
     {
         b2DestroyBody(ID);

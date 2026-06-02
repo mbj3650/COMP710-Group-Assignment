@@ -31,6 +31,7 @@ Projectile::~Projectile()
         b2DestroyBody(ID);
     }
     delete m_pSprite;
+    m_pCurrentTile = 0;
     m_pSprite = 0;
 }
 
@@ -58,7 +59,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     m_pSprite->SetScale(scale);
 
     this->Target = Target;//what it should hit 
-    m_speed = 500.0f*speed;//speed of it
+    m_speed = (500.0f - (ishoming * 380)) * speed * (32 / m_tileSize);//speed of it
 
     // Box2D body setup
     b2BodyDef WorldObj = b2DefaultBodyDef();
@@ -113,11 +114,29 @@ void Projectile::Process(float deltaTime)
             float dx = targetX - m_x;//update distances
             float dy = targetY - m_y;
             float dist = sqrtf(dx * dx + dy * dy);
-            b2Vec2 vel = { (dx / dist) * m_speed, (dy / dist) * m_speed };//change velocity and direction
-            b2Body_SetLinearVelocity(ID, vel);
+            bool atspeed = true;
+            b2Vec2 vel = { (dx / dist) * m_speed*5, (dy / dist) * m_speed * 5 };//change velocity and direction
+            if (b2Body_GetLinearVelocity(ID).x > vel.x + 2 || b2Body_GetLinearVelocity(ID).x < vel.x - 2) {
+                b2Body_ApplyLinearImpulseToCenter(ID, {vel.x*12, 0}, true);
+                atspeed = false;
+            }
+            if ( b2Body_GetLinearVelocity(ID).y > vel.y+2 || b2Body_GetLinearVelocity(ID).y < vel.y - 2) {
+                b2Body_ApplyLinearImpulseToCenter(ID, { 0 , vel.y * 12 }, true);
+                atspeed = false;
+            }
+            if (atspeed) {
+                b2Body_SetLinearVelocity(ID, vel);
+            }
+           
         }
         else {
-            ishoming = false;//else make it no longer home
+            if (!owner->EnemyInRadius.empty()) {//if there was another enemy
+                Target = owner->EnemyInRadius.at(0);//aim for that instead
+            }
+            else {
+                ishoming = false;//else make it no longer home
+            }
+           
         }
     }
 
@@ -137,7 +156,7 @@ void Projectile::Process(float deltaTime)
         if (B2_ID_EQUALS(shapeId, beginTouch->sensorShapeId)) {//CHECK IF THE SENSOR EVENT IS RELEVANT 
             void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);//get the object its colliding with
             Enemy* NewEnemy = reinterpret_cast<Enemy*>(myUserData);
-            NewEnemy->TurnBlue();
+            //NewEnemy->TurnBlue();
             NewEnemy->TakeDamage(damage);
             if (effect != -1) {//if projectile has an effect
                 NewEnemy->TakeEffect(effect);
