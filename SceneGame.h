@@ -22,9 +22,10 @@ class Projectile;
 class Enemy;
 class Tower;
 class DynamicText;
-
+class UIShopSlot;
+class UIShopManager;
 // Number of instruction text lines shown at game start
-const int NUM_INSTRUCTION_LINES = 8;
+const int NUM_INSTRUCTION_LINES = 9;
 
 // Particle pool size
 const int PARTICLE_POOL_SIZE = 40;
@@ -118,6 +119,10 @@ protected:
     Sprite*   m_pParticleSprite;              // shared sprite (explosion.png)
     Particle  m_particlePool[PARTICLE_POOL_SIZE];
     void      SpawnBurst(float x, float y);   // activates a burst of particles
+
+    // UI
+    bool m_bHideUI;
+    UIShopManager* m_pShopManager;
 };
 
 #endif // __SCENEMAIN_H__

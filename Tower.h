@@ -38,6 +38,12 @@ public:
     float GetX() const { return m_x; }
     float GetY() const { return m_y; }
 
+    // Used by sidepanel
+	Tile* GetCurrentTile() const { return m_pCurrentTile; }
+	std::string GetTowerID() const { return towerID; }
+    void Sell();
+	bool IsSold() const { return m_bSelling; }
+    int GetSellValue() const;
 protected:
 
 private:
@@ -73,6 +79,10 @@ private:
     float speed;    
     float firedelay;
     float firetimer;
+
+    // sidepanel
+    std::string towerID;
+    bool m_bSelling;
 };
 
 #endif // __TOWER_H__

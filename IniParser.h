@@ -4,6 +4,7 @@
 // Local includes:
 #include <string>
 #include <map>
+#include <vector>
 #include <iostream>
 using namespace std;
 
@@ -27,6 +28,7 @@ private:
 	// Member data:
 public:
 	map<string, string> layout;
+	vector<string> sections;
 protected:
 private:
 };

@@ -25,6 +25,11 @@
 #include "inlinehelpers.h"
 #include "Tilelist.h"
 #include "EconomyConfig.h"
+#include "UIShopSlot.h"
+#include "UIShopManager.h"
+#include "GameData.h"
+#include "TowerData.h"
+#include "ProjectileData.h"
 #include <iostream>
 #include <string>
 #include <box2d.h>
@@ -47,7 +52,8 @@ const char* INSTRUCTION_LINES[NUM_INSTRUCTION_LINES] = {
     "A / D    Move cursor left / right",
     "B        Undo last step",
     "ESC      Quit",
-    "SPACE    Start game"
+    "SPACE    Start game",
+    "H        Hide UI"
 };
 
 SceneGame::SceneGame()
@@ -75,7 +81,6 @@ SceneGame::SceneGame()
     m_pSoundWaveStart  = 0;
     m_pMusicChannel    = 0;
     m_pParticleSprite  = 0;
-
     for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
         m_pInstructions[i] = 0;
 }
@@ -87,6 +92,7 @@ SceneGame::~SceneGame()
     delete m_pCentre;
     m_pCentre = 0;
 
+    GameData::Destroy();
     for (int i = 0; i < (int)m_enemies.size(); i++)
     {
         delete m_enemies[i];
@@ -125,6 +131,7 @@ SceneGame::~SceneGame()
     if (m_pSoundGameOver)  { m_pSoundGameOver->release();  m_pSoundGameOver  = 0; }
     if (m_pSoundWaveStart) { m_pSoundWaveStart->release(); m_pSoundWaveStart = 0; }
 
+    UIShopManager::DestroyInstance();
     b2DestroyWorld(WorldPointer);
     delete World;
     std::cout << "WORLD DESTROYED\n";
@@ -210,6 +217,9 @@ bool SceneGame::Initialise(Renderer& renderer)
     m_pGoldText->SetText(renderer, "Gold: " + std::to_string(m_iGold));
     m_pGoldText->SetPosition(16, 80);
 
+    // Tower and UI
+    GameData::Get().Initialise();
+	UIShopManager().GetInstance().Initialise(renderer);
     // FMOD
     FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
     if (fmod)
@@ -329,7 +339,11 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         }
         return; // hold everything until instructions are dismissed
     }
-
+    // H to toggle shop/upgrades UI
+    if (inputSystem.GetKeyState(SDL_SCANCODE_H) == BS_PRESSED)
+    {
+        m_bHideUI = !m_bHideUI;
+	}
     // --- Game over ---
     if (m_bGameOver)
     {
@@ -369,14 +383,38 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     }
     else
     {
-
+        // tower interactions
         if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
-            if (list->Hovered->hastower == false) {
-                Tower* newTower = new Tower();
-                newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, "Shooter");
-                m_towers.push_back(newTower);
+            // try placing tower
+            if (list->Hovered->hastower == false && !list->Hovered->isPath && UIShopManager::GetInstance().IsTowerSelected() && !UIShopManager::GetInstance().IsAnyElementHovered(inputSystem)) {
+                if (TrySpend(GameData::Get().Tower[UIShopManager::GetInstance().GetSelectedTowerType()].Price))
+                {
+                    Tower* newTower = new Tower();
+                    newTower->Initialise(*m_pRenderer, list->Hovered, m_fTileSize, WorldPointer, m_projectiles, UIShopManager::GetInstance().GetSelectedTowerType());
+                    m_towers.push_back(newTower);
+					UIShopManager::GetInstance().UpdateSelection(-1); // deselect
+                    UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, newTower);
+                }
+                else
+                {
+					cout << "Not enough gold to build " << UIShopManager::GetInstance().GetSelectedTowerType() << "\n";
+                }
+            }
+            else if (list->Hovered->hastower)
+            {
+                std::vector<Tower*>::iterator iter = std::find_if(m_towers.begin(), m_towers.end(), [this](Tower* tower) {
+                    return tower->GetCurrentTile() == list->Hovered; // return tower's curerent tile is same as hovered
+                });
+                if (iter != m_towers.end()) UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, *iter); // making sure it was found
+            }
+            else if (!list->Hovered->hastower && !UIShopManager::GetInstance().IsTowerSelected() && !UIShopManager::GetInstance().IsAnyElementHovered(inputSystem))
+            {
+                // Deselects sidepanel if you clicked on anything
+                UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, 0);
             }
         }
+
+        UIShopManager::GetInstance().Process(deltaTime, inputSystem);
         m_fSpawnTimer += deltaTime;
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
@@ -397,6 +435,15 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 
         for (int i = (int)m_towers.size() - 1; i >= 0; i--)//tower process
         {
+            // Selling
+            if (m_towers[i]->IsSold())
+            {
+                m_towers[i]->GetCurrentTile()->hastower = false;
+                AddGold(m_towers[i]->GetSellValue()); // refund half the tower's price
+                delete m_towers[i];
+                m_towers.erase(m_towers.begin() + i);
+				continue;
+            }
             m_towers[i]->Process(deltaTime);
         }
 
@@ -553,11 +600,17 @@ void SceneGame::Draw(Renderer& renderer)
     for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
         if (m_particlePool[i].m_bAlive) m_particlePool[i].Draw(renderer);
 
+    
+
     if (!moving)
     {
         m_pLivesText->Draw(renderer);
         m_pWaveText->Draw(renderer);
         m_pGoldText->Draw(renderer);
+        if (!m_bHideUI)
+        {
+            UIShopManager::GetInstance().Draw(renderer);
+        }
     }
 }
 
@@ -598,6 +651,10 @@ void SceneGame::DebugDraw()
     if (ImGui::Button("Add 100 Gold"))
     {
         AddGold(100);
+    }
+    if (ImGui::Button("Hide UI"))
+    {
+        m_bHideUI = !m_bHideUI;
     }
 }
 
