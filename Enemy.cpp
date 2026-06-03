@@ -2,6 +2,8 @@
 // Modified by: MartinYan12138y
 // Changes: Added HP system -- TakeDamage() and IsDead() so towers
 //          can damage enemies. HP scales with wave number.
+//          Added boss enemy on every 10th wave (the blob): bigger hp,
+//          slower move speed, and heals itself over time.
 
 #include "Enemy.h"
 #include "Tile.h"
@@ -25,6 +27,8 @@ Enemy::Enemy()
     m_bReachedEnd  = false;
     m_iHP          = 3;
     m_iMaxHP       = 3;
+    m_bIsBoss      = false;
+    regentimer     = 0.0f;
 }
 
 Enemy::~Enemy()
@@ -47,8 +51,20 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     m_pCurrentTile = startTile;
 
     EnemyData data = GameData::Get().Enemy[EnemyID];
+
+    // every 10th wave (10, 20, 30...) we make a boss enemy.
+    // for now any enemy spawned on those waves becomes the boss (the blob).
+    if (waveNumber % 10 == 0)
+    {
+        m_bIsBoss = true;
+    }
+
     // HP scales with wave: wave 1 = 3 HP, wave 2 = 5 HP, wave 3 = 7 HP, etc.
     m_iMaxHP = data.BonusHealth + 1 + waveNumber * 2 ;
+    if (m_bIsBoss)
+    {
+        m_iMaxHP = m_iMaxHP * 5;//boss has way more hp so it takes a while to kill
+    }
     m_iHP    = m_iMaxHP;
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
@@ -56,12 +72,30 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
    
     m_damage = data.Damage;
     m_speed *= data.Speed;//multiply the speed so they can move faster or slower
+    if (m_bIsBoss)
+    {
+        m_speed = m_speed * 0.5f;//boss moves slower than normal enemies
+    }
 
     std::string SpritePath = "..\\assets\\projectiles\\" + data.Sprite + ".png";
     m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
-    float scale = (tileSize * 0.65f) / m_pSprite->GetWidth();
+    // bosses are drawn bigger so the player can tell them apart
+    float scalesize = 0.65f;
+    if (m_bIsBoss)
+    {
+        scalesize = 1.2f;
+    }
+    float scale = (tileSize * scalesize) / m_pSprite->GetWidth();
     m_pSprite->SetScale(scale);
+
+    // give the boss a green tint so it looks like a blob and stands out
+    if (m_bIsBoss)
+    {
+        m_pSprite->SetRedTint(0.3f);
+        m_pSprite->SetGreenTint(1.0f);
+        m_pSprite->SetBlueTint(0.3f);
+    }
 
     // Box2D body setup
     b2BodyDef WorldObj = b2DefaultBodyDef();
@@ -139,6 +173,22 @@ void Enemy::Process(float deltaTime)
             TakeDamage(1);
             poisontimer = 0.5;//reset timer
             poisoncount--;//reduce poisoncount(ticks) by 1
+        }
+    }
+
+    //BOSS HEALING
+    //the boss heals a bit of hp every half second, so the player has to
+    //out-damage the healing to actually kill it. normal enemies dont do this.
+    if (m_bIsBoss) {
+        if (regentimer > 0) {
+            regentimer -= deltaTime;
+        }
+        else {
+            m_iHP += 2;//heal 2 hp
+            if (m_iHP > m_iMaxHP) {
+                m_iHP = m_iMaxHP;//dont go over the max hp
+            }
+            regentimer = 0.5;//reset the timer
         }
     }
 
