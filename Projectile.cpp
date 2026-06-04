@@ -130,9 +130,15 @@ void Projectile::Process(float deltaTime)
            
         }
         else {
-            if (!owner->EnemyInRadius.empty()) {//if there was another enemy
-                Target = owner->EnemyInRadius.at(0);//aim for that instead
+            if (owner != NULL) {
+                if (!owner->EnemyInRadius.empty()) {//if there was another enemy
+                    Target = owner->EnemyInRadius.at(0);//aim for that instead
+                }
+                else {
+                    ishoming = false;//else make it no longer home
+                }
             }
+           
             else {
                 ishoming = false;//else make it no longer home
             }
