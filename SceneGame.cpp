@@ -414,7 +414,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             }
         }
 
-        UIShopManager::GetInstance().Process(deltaTime, inputSystem);
+        UIShopManager::GetInstance().Process(deltaTime, inputSystem, &m_iGold);
         m_fSpawnTimer += deltaTime;
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 

@@ -50,8 +50,19 @@ void GameData::LoadTowerData()
 		Parser.GetValueAsFloat(section + "|Range"),
 		Parser.GetValueAsFloat(section + "|Firerate"),
 		Parser.GetValueAsString(section + "|ProjectileID"),
-		Parser.GetValueAsFloat(section + "|Speed")
+		Parser.GetValueAsFloat(section + "|Speed"),
+		Parser.GetValueAsInt(section + "|ID"),
+		Parser.GetValueAsString(section + "|Upgrade1"),
+		Parser.GetValueAsString(section + "|Upgrade1Desc"),
+		Parser.GetValueAsInt(section + "|Upgrade1Price"),
+		Parser.GetValueAsString(section + "|Upgrade2"),
+		Parser.GetValueAsString(section + "|Upgrade2Desc"),
+		Parser.GetValueAsInt(section + "|Upgrade2Price"),
+		Parser.GetValueAsString(section + "|Upgrade3"),
+		Parser.GetValueAsString(section + "|Upgrade3Desc"),
+		Parser.GetValueAsInt(section + "|Upgrade3Price")
 		)});
+		
 	}
 }
 void GameData::LoadProjectileData()
@@ -66,7 +77,8 @@ void GameData::LoadProjectileData()
 		Parser.GetValueAsInt(section + "|Pierce"),
 		Parser.GetValueAsInt(section + "|Homing"),
 		Parser.GetValueAsInt(section + "|Effect"),
-		Parser.GetValueAsInt(section + "|Lifetime")
+		Parser.GetValueAsInt(section + "|Lifetime"),
+		Parser.GetValueAsInt(section + "|ID")
 		)});
 	}
 }
@@ -81,7 +93,8 @@ void GameData::LoadEnemyData()
 		Parser.GetValueAsInt(section + "|Price"),
 		Parser.GetValueAsInt(section + "|Damage"),
 		Parser.GetValueAsFloat(section + "|Speed"),
-		Parser.GetValueAsInt(section + "|BonusHealth")
+		Parser.GetValueAsInt(section + "|BonusHealth"),
+		Parser.GetValueAsInt(section + "|ID")
 		)});
 	}
 }

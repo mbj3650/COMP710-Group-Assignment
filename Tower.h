@@ -17,6 +17,18 @@ struct b2BodyId;
 class Enemy;
 class Renderer;
 
+enum UpgradeID
+{
+    Shooter_RapidFire = 1,
+    Shooter_LongRange = 2,
+    Shooter_LethalShot = 3,
+    Iceman_SwiftThrow = 4,
+    Iceman_Coldness = 5,
+    Iceman_SeekingSnow = 6,
+    Poisoner_LongReach = 7,
+    Poisoner_ExtraToxic = 8,
+    Poisoner_ThickFog = 9,
+};
 // Class declaration:
 class Tower
 {
@@ -44,8 +56,11 @@ public:
     void Sell();
 	bool IsSold() const { return m_bSelling; }
     int GetSellValue() const;
+    Sprite* GetUpgradeSprite(int index);
+    bool Upgrade(int index, int* gold);
+    bool CanUpgrade(int index);
+    void ApplyUpgrade(UpgradeID upgrade);
 protected:
-
 private:
 	Tower(const Tower& Tower);
 	Tower& operator=(const Tower& Tower);
@@ -82,7 +97,19 @@ private:
 
     // sidepanel
     std::string towerID;
+    int m_iTowerIDUpgrade;
     bool m_bSelling;
+    Sprite* m_pUpgrade1Sprite;
+    Sprite* m_pUpgrade2Sprite;
+    Sprite* m_pUpgrade3Sprite;
+    bool m_bUpgrade1;
+    bool m_bUpgrade2;
+    bool m_bUpgrade3;
+    int m_iUpgrade1Price;
+    int m_iUpgrade2Price;
+    int m_iUpgrade3Price;
+
+    int m_iBonusDamage;
 };
 
 #endif // __TOWER_H__

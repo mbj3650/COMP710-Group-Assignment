@@ -54,7 +54,7 @@ bool Texture::Initialise(const char* pcFilename)
 	}
 	else
 	{
-		SDL_Surface* pSurface = IMG_Load("..\\assets\\upgrades\\missingtexture.png");
+		SDL_Surface* pSurface = IMG_Load("..\\assets\\ball.png");
 		m_iWidth = pSurface->w;
 		m_iHeight = pSurface->h;
 		int bytesPerPixel = pSurface->format->BytesPerPixel;

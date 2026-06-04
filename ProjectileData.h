@@ -5,7 +5,7 @@ class ProjectileData
 {
 public:
 	ProjectileData();
-	ProjectileData(std::string sprite, int damage, int pierce, int homing, int effect, int lifetime);
+	ProjectileData(std::string sprite, int damage, int pierce, int homing, int effect, int lifetime, int id);
 	~ProjectileData();
 
 	std::string Sprite;
@@ -14,7 +14,7 @@ public:
 	int Homing;
 	int Effect;
 	int Lifetime;
-
+	int ID;
 };
 
 #endif // PROJECTILEDATA_H

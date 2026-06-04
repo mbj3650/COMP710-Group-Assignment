@@ -22,6 +22,9 @@ Tower::Tower()
     m_x = 0;
     m_y = 0;
     m_tileSize = 40.0f;
+    m_pUpgrade1Sprite = 0;
+    m_pUpgrade2Sprite = 0;
+    m_pUpgrade3Sprite = 0;
 }
 
 Tower::~Tower()
@@ -32,6 +35,13 @@ Tower::~Tower()
     }
     delete m_pSprite;
     m_pSprite = 0;
+
+    delete m_pUpgrade1Sprite;
+    m_pUpgrade1Sprite = 0;
+    delete m_pUpgrade2Sprite;
+    m_pUpgrade2Sprite = 0;
+    delete m_pUpgrade3Sprite;
+    m_pUpgrade3Sprite = 0;
 }
 
 bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, std::string TowerID)
@@ -54,6 +64,18 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     string SpritePath = "..\\assets\\towers\\" + data.Sprite + ".png";
     m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
+    // upgrade sprites
+    SpritePath = "..\\assets\\upgrades\\" + data.Upgrade1Name + ".png";
+    m_pUpgrade1Sprite = renderer.CreateSprite(SpritePath.c_str());
+    SpritePath = "..\\assets\\upgrades\\" + data.Upgrade2Name + ".png";
+    m_pUpgrade2Sprite = renderer.CreateSprite(SpritePath.c_str());
+    SpritePath = "..\\assets\\upgrades\\" + data.Upgrade3Name + ".png";
+    m_pUpgrade3Sprite = renderer.CreateSprite(SpritePath.c_str());
+
+    m_iUpgrade1Price = data.Upgrade1Price;
+    m_iUpgrade2Price = data.Upgrade2Price;
+    m_iUpgrade3Price = data.Upgrade3Price;
+    m_iTowerIDUpgrade = data.ID;
     //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
     canhome = false;
     m_projectiles = &projectileaddress;
@@ -182,4 +204,102 @@ void Tower::Sell()
 int Tower::GetSellValue() const
 {
     return Price / 2;
+}
+
+Sprite* Tower::GetUpgradeSprite(int index)
+{
+    switch (index)
+    {
+        case 1:
+            return m_pUpgrade1Sprite;
+        case 2:
+            return m_pUpgrade2Sprite;
+        case 3:
+            return m_pUpgrade3Sprite;
+    }
+    return m_pUpgrade1Sprite;
+}
+
+bool Tower::Upgrade(int index, int* gold)
+{
+    switch (index)
+    {
+    case 1:
+        if (*gold >= m_iUpgrade1Price)
+        {
+            m_bUpgrade1 = true;
+            *gold -= m_iUpgrade1Price;
+            ApplyUpgrade(static_cast<UpgradeID>(3 * m_iTowerIDUpgrade + 1));
+            return true;
+        }
+        break;
+    case 2:
+        if (*gold >= m_iUpgrade2Price)
+        {
+            m_bUpgrade2 = true;
+            *gold -= m_iUpgrade2Price;
+            ApplyUpgrade(static_cast<UpgradeID>(3 * m_iTowerIDUpgrade + 2));
+            return true;
+        }
+        break;
+    case 3:
+        if (*gold >= m_iUpgrade3Price)
+        {
+            m_bUpgrade3 = true;
+            *gold -= m_iUpgrade3Price;
+            ApplyUpgrade(static_cast<UpgradeID>(3 * m_iTowerIDUpgrade + 3));
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+bool Tower::CanUpgrade(int index)
+{
+    switch (index)
+    {
+    case 1:
+        return !m_bUpgrade1;
+    case 2:
+        return !m_bUpgrade2;
+    case 3:
+        return !m_bUpgrade3;
+    }
+    return false;
+}
+
+void Tower::ApplyUpgrade(UpgradeID upgrade)
+{
+    switch (upgrade)
+    {
+        case Shooter_RapidFire:
+            firedelay -= 0.5f;
+            speed += 0.5f;
+            break;
+        case Shooter_LongRange:
+            range += 1.5f;
+            break;
+        case Shooter_LethalShot:
+            m_iBonusDamage += 1;
+            break;
+        case Iceman_SwiftThrow:
+            firedelay -= 0.5f;
+            break;
+        case Iceman_Coldness:
+            // Unfinished
+            break;
+        case Iceman_SeekingSnow:
+            // Unfinished
+            break;
+        case Poisoner_LongReach:
+            range += 1.0f;
+            break;
+        case Poisoner_ExtraToxic:
+            // Unfinished
+            break;
+        case Poisoner_ThickFog:
+            // Unfinished
+            break;
+    }
 }

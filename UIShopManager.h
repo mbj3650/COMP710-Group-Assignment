@@ -16,7 +16,7 @@ public:
 	static void DestroyInstance();
 
 	void Initialise(Renderer& renderer);
-	void Process(float deltaTime, InputSystem& input);
+	void Process(float deltaTime, InputSystem& input, int* m_iGold);
 	void Draw(Renderer& renderer);
 	void UpdateSelection(int slot);
 	std::string GetSelectedTowerType();

@@ -6,6 +6,7 @@ class Sprite;
 class Tower;
 class DynamicText;
 class InputSystem;
+class UIUpgradeButton;
 
 class UISidepanel
 {
@@ -14,7 +15,7 @@ public:
     ~UISidepanel();
 
     void Initialise(Renderer& renderer);
-    void Process(float deltaTime, InputSystem& input);
+    void Process(float deltaTime, InputSystem& input, int* gold);
     void Draw(Renderer& renderer);
     bool IsElementHovered(InputSystem& input) const;
     bool IsSpriteHovered(Sprite* sprite, InputSystem& input) const;
@@ -31,6 +32,11 @@ private:
     // sell button
     Sprite* m_pSellSprite;
 	DynamicText* m_pSellText;
+
+    // upgrade buttons
+    UIUpgradeButton* m_pUpgrade1;
+    UIUpgradeButton* m_pUpgrade2;
+    UIUpgradeButton* m_pUpgrade3;
 };
 
 #endif // UI_SIDEPANEL_H
