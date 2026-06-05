@@ -54,6 +54,7 @@ private:
 public:
     std::vector<b2ShapeId> EnemyInRadius;
     std::vector<Projectile*>* m_projectiles;
+    b2ShapeId shapeId;//setting this to public for projectile use
 protected:
 
 private:
@@ -62,7 +63,7 @@ private:
     Tile* m_pCurrentTile;
 
     b2BodyId  ID;
-    b2ShapeId shapeId;
+
 
     b2BodyId  RadiusID;
     b2ShapeId RadiusshapeId;
