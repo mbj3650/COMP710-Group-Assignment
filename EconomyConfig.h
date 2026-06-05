@@ -15,7 +15,7 @@
 const int   START_GOLD       = 300;    // enough for 2 basic towers, or 1 mid + change
 const int   KILL_BOUNTY_BASE = 6;      // gold for one normal kill on wave 1
 const float BOUNTY_DECAY     = 0.90f;  // bounty is multiplied by this each wave
-const int   BOUNTY_FLOOR     = 2;      // bounty never drops below this
+const int   BOUNTY_FLOOR     = 3;      // bounty never drops below this (bumped from 2 -- late waves felt too dry)
 const float PAY_WINDOW       = 40.0f;  // seconds a wave keeps paying for kills
 const int   PATH_PAR         = 25;     // paths with this many tiles or fewer get a bonus
 
@@ -64,5 +64,19 @@ const int DEMOMAN_UPGRADE_1        = 240;  const int DEMOMAN_UPGRADE_2        = 
 // doc wants each tower to have its own float radius) by passing a value into
 // Tower::Initialise instead of using this default.
 const float TOWER_RADIUS_TILES_DEFAULT = 2.5f; // ~2-3 tiles in every direction
+
+// -------------------------------------------------------
+// v0.2 proposed tunables
+// These are NOT wired into the gameplay code yet -- they live here so the
+// numbers are in one place once someone hooks them up. Same idea as the rest
+// of this file: tune here, not scattered around the code.
+// -------------------------------------------------------
+// flat gold handed out for clearing a whole wave, on top of kill bounties.
+const int   WAVE_CLEAR_BONUS    = 25;
+// gold a boss drops when killed, instead of a normal kill bounty (every 10th wave).
+const int   BOSS_KILL_BONUS     = 100;
+// fraction of a tower's spent gold you get back on sell (reference for future
+// per-tower sell tuning -- the sell code currently has its own value).
+const float SELL_REFUND_PERCENT = 0.5f; // 50%
 
 #endif // ECONOMYCONFIG_H
