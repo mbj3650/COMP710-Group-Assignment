@@ -7,6 +7,7 @@
 class Renderer;
 class Tile;
 class InputSystem;
+class Sprite;
 // ---------------------------------------------------------------------------
 // COORDINATE CONVENTION (unified across the grid/path system):
 //   Vector2.x = COLUMN  (horizontal, screen X)
@@ -50,6 +51,8 @@ public:
 	Vector2 tilehover;
 	Vector2 Startpos;
 	Vector2 Endpos;
+	Sprite* Startflag;
+	Sprite* Endflag;
 	int rows;
 	int columns;
 protected:

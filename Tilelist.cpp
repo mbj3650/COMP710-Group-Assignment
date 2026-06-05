@@ -6,6 +6,7 @@
 #include "renderer.h"
 #include "Tile.h"
 #include "vector2.h"
+#include "sprite.h"
 // Library includes:
 #include <cassert>
 #include "inlinehelpers.h"
@@ -22,6 +23,8 @@ Tilelist::~Tilelist()
 		delete tiles.at(k);
 		tiles.at(k) = 0;
 	}
+	delete Endflag;
+	delete Startflag;
 };
 
 bool
@@ -50,9 +53,27 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 		Endpos.x = 0;
 	}
 	GetTile(Startpos)->setStart();//set start
+	GetTile(Startpos)->isPath = true;
 	GetTile(Endpos)->setEnd();//set end
 
 	path.push_back(GetStart());//add as start node to list
+
+	Endflag = renderer.CreateSprite("..\\assets\\flag.png"); // set sprite
+	Startflag = renderer.CreateSprite("..\\assets\\flag.png"); // set sprite
+	Startflag->SetScale( // set scale to make sure it fits in screen
+		renderer.GetWidth() / (Startflag->GetWidth()/2 * (1.0 * columns))
+	);
+
+	Startflag->SetX(GetTile(Startpos)->Position.x * Startflag->GetWidth() / 2 + (Startflag->GetWidth() / 4));
+	Startflag->SetY(GetTile(Startpos)->Position.y * Startflag->GetWidth() / 2 + (Startflag->GetWidth() /  8));
+
+	Endflag = renderer.CreateSprite("..\\assets\\flag.png"); // set sprite
+	Endflag->SetScale( // set scale to make sure it fits in screen
+		renderer.GetWidth() / (Endflag->GetWidth() / 2 * (1.0 * columns))
+	);
+
+	Endflag->SetX(GetTile(Endpos)->Position.x * Endflag->GetWidth() / 2 + (Endflag->GetWidth() / 4));
+	Endflag->SetY(GetTile(Endpos)->Position.y * Endflag->GetWidth() / 2 + (Endflag->GetWidth() / 8));
 	return true;
 };
 
@@ -82,6 +103,13 @@ Tilelist::Draw(Renderer& renderer)
 	{
 		tiles.at(k)->Draw(renderer);
 	}
+	for (int k = 0; k < path.size(); ++k)
+	{
+		path.at(k)->Draw(renderer);
+	}
+	Startflag->Draw(renderer);
+	Endflag->Draw(renderer);
+
 };
 
 Tile* Tilelist::GetTile(Vector2 Pos) {
