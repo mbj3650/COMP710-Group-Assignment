@@ -131,6 +131,7 @@ void Enemy::TakeEffect(int effect)
     enum Effects {
         FROST,
         POISON,
+        HEATED,
     };
     switch (effect) {
         case FROST:
@@ -139,6 +140,9 @@ void Enemy::TakeEffect(int effect)
         case POISON:
             poisoncount += 3;//make it stackable instead of capping it
             poisontimer = 0.5;
+            break;
+        case HEATED://if slowed, melt undo that effcet
+            slowtimer = 0;
             break;
     }
 }

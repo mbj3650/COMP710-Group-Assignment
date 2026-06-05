@@ -50,11 +50,16 @@ private:
 
     float max_x;//values for out of bounds checks
     float max_y;
+    float alphaoffset;//fadeout for projectiles with lifetimes
+    float scale; //scale moved here for scaling effects 
 
     bool ishoming;//if it should constantly travel towards a target or not
+    bool isboomerang;//if it should head back to the tower or not
     int maxenemies = 1;//can only hit one enemy by default, we can set this higher or lower to hit more or less enemies
     int damage;
     int effect;
+    float specialtimer; // for projectiles who need a special kind of timer
+    bool m_bAlive;//general "kill" boolean for projectiles with special conditions
     float lifetime;
     b2ShapeId Target;//NOTE: Please do not make a projectile both pierce and homing at this time
 };

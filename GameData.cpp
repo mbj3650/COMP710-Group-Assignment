@@ -66,7 +66,8 @@ void GameData::LoadProjectileData()
 		Parser.GetValueAsInt(section + "|Pierce"),
 		Parser.GetValueAsInt(section + "|Homing"),
 		Parser.GetValueAsInt(section + "|Effect"),
-		Parser.GetValueAsInt(section + "|Lifetime")
+		Parser.GetValueAsInt(section + "|Lifetime"),
+		Parser.GetValueAsInt(section + "|Size")
 		)});
 	}
 }
