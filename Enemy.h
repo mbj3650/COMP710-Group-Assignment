@@ -49,6 +49,9 @@ public:
     float GetY() const { return m_y; }
 
     int  GetDamage()   const { return m_damage; }
+
+    //gold given to the player when this enemy is killed
+    int  GetBounty()   const { return m_bounty; }
 private:
     Enemy(const Enemy&);
     Enemy& operator=(const Enemy&);
@@ -71,6 +74,7 @@ private:
     int m_iMaxHP;
 
     int m_damage;//damage it deals upon reaching end
+    int m_bounty;//gold given to the player on kill (loaded from enemy data)
 
     //effects
     float poisontimer;

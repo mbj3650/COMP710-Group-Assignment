@@ -56,7 +56,7 @@ private:
     SceneGame& operator=(const SceneGame&);
 
     // Economy helpers (kept private -- internal book-keeping)
-    int  KillBounty(int wave) const;  // gold for one normal kill (with wave decay)
+    int  KillBounty(int wave, int base) const;  // gold for one kill (per-enemy base, with wave decay)
     bool IsPayWindowOpen() const;     // are kills still rewarded this wave?
     void RefreshGoldText();           // update the HUD gold label
 

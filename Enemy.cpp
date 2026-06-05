@@ -29,6 +29,7 @@ Enemy::Enemy()
     m_iMaxHP       = 3;
     m_bIsBoss      = false;
     regentimer     = 0.0f;
+    m_bounty       = 0;
 }
 
 Enemy::~Enemy()
@@ -71,6 +72,7 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     m_y = startTile->Position.y * tileSize + tileSize * 0.5f;
    
     m_damage = data.Damage;
+    m_bounty = data.Bounty;//how much gold this enemy is worth when killed
     m_speed *= data.Speed;//multiply the speed so they can move faster or slower
     if (m_bIsBoss)
     {

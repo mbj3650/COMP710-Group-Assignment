@@ -82,7 +82,8 @@ void GameData::LoadEnemyData()
 		Parser.GetValueAsInt(section + "|Price"),
 		Parser.GetValueAsInt(section + "|Damage"),
 		Parser.GetValueAsFloat(section + "|Speed"),
-		Parser.GetValueAsInt(section + "|BonusHealth")
+		Parser.GetValueAsInt(section + "|BonusHealth"),
+		Parser.GetValueAsInt(section + "|Bounty")
 		)});
 	}
 }

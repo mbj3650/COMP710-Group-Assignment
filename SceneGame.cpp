@@ -267,13 +267,14 @@ void SceneGame::SpawnBurst(float x, float y)
 // All the actual numbers live in EconomyConfig.h -- tune balance there.
 // -------------------------------------------------------
 
-// Gold given for killing one normal enemy on the given wave.
-// The reward shrinks a bit every wave (BOUNTY_DECAY) but never goes under
-// BOUNTY_FLOOR. Without the decay the late waves would print way too much
-// money, since the enemy count keeps climbing each wave.
-int SceneGame::KillBounty(int wave) const
+// Gold given for killing one enemy on the given wave.
+// 'base' is the enemy's own bounty (from enemy data), so different enemies can
+// be worth different amounts. The reward still shrinks a bit every wave
+// (BOUNTY_DECAY) but never goes under BOUNTY_FLOOR. Without the decay the late
+// waves would print way too much money, since the enemy count keeps climbing.
+int SceneGame::KillBounty(int wave, int base) const
 {
-    float reward = KILL_BOUNTY_BASE * powf(BOUNTY_DECAY, (float)(wave - 1));
+    float reward = base * powf(BOUNTY_DECAY, (float)(wave - 1));
     int   rounded = (int)(reward + 0.5f); // round to nearest
     if (rounded < BOUNTY_FLOOR) rounded = BOUNTY_FLOOR;
     return rounded;
@@ -478,7 +479,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
                 // boss/relic system should skip this for the boss itself.
                 if (IsPayWindowOpen())
                 {
-                    m_iGold += KillBounty(m_iWave);
+                    m_iGold += KillBounty(m_iWave, m_enemies[i]->GetBounty());
                     RefreshGoldText();
                 }
 
