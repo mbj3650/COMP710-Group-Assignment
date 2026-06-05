@@ -50,7 +50,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     firetimer = 0;
 	towerID = TowerID;
     Price = data.Price;
-    AimForLast = true;
+    AimForLast = false;
 
     string SpritePath = "..\\assets\\towers\\" + data.Sprite + ".png";
     m_pSprite = renderer.CreateSprite(SpritePath.c_str());
