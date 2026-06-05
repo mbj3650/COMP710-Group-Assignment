@@ -47,7 +47,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
 	speed = data.Speed;
 	range = data.Range;
 	firedelay = data.Firerate;
-    firetimer = firedelay;
+    firetimer = 0;
 	towerID = TowerID;
     Price = data.Price;
 
