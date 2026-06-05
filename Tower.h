@@ -81,6 +81,8 @@ private:
     float firedelay;
     float firetimer;
 
+    bool AimForLast;
+
     // sidepanel
     std::string towerID;
     bool m_bSelling;

@@ -50,6 +50,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     firetimer = 0;
 	towerID = TowerID;
     Price = data.Price;
+    AimForLast = true;
 
     string SpritePath = "..\\assets\\towers\\" + data.Sprite + ".png";
     m_pSprite = renderer.CreateSprite(SpritePath.c_str());
@@ -89,6 +90,10 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     m_pSprite->SetX(b2Body_GetPosition(ID).x);
     m_pSprite->SetY(b2Body_GetPosition(ID).y);
    
+
+
+    m_x = b2Body_GetPosition(ID).x;
+    m_y = b2Body_GetPosition(ID).y;
     std::cout << "made tower!\n" << b2Shape_GetUserData(shapeId) << "\n";
 
     return true;
@@ -139,14 +144,25 @@ void Tower::Process(float deltaTime)
         
        
     }
+    b2ShapeId Target;
+    if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
+        if (AimForLast) {//check if we're aiming for the last enemy 
+            Target = EnemyInRadius.at(EnemyInRadius.size() - 1);//if so aim at last enemy
+        }
+        else {//else aim at first enemy
+            Target = EnemyInRadius.at(0);
+        }
+    }
+
+
 
     if (firetimer > 0) {//decrease timer
         firetimer -= deltaTime;
     }
-    else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
+    else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius 
         std::cout << "firing!\n";
         Projectile* newprojectile = new Projectile();//make new projectile
-        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), Target, projectileID, speed);//add to it
         m_projectiles->push_back(newprojectile);//
         firetimer = firedelay;
     }
@@ -154,16 +170,14 @@ void Tower::Process(float deltaTime)
 
 
 
-    m_x = b2Body_GetPosition(ID).x;
-    m_y = b2Body_GetPosition(ID).y;
-
-    m_pSprite->SetX(b2Body_GetPosition(ID).x);
-    m_pSprite->SetY(b2Body_GetPosition(ID).y);
-    if (!EnemyInRadius.empty()) {
+    if (towerID == "Detonator") {
+        m_pSprite->SetAngle(m_pSprite->GetAngle() - ((30 + (firetimer / firedelay * 360)) * deltaTime));
+    }
+    else if (!EnemyInRadius.empty()) {
         m_pSprite->SetAngle(
                 atan2(
-                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).x - m_x),
-                    (b2Body_GetPosition(b2Shape_GetBody(EnemyInRadius.at(0))).y - m_y)
+                    (b2Body_GetPosition(b2Shape_GetBody(Target)).x - m_x),
+                    (b2Body_GetPosition(b2Shape_GetBody(Target)).y - m_y)
                     ) * (180 / M_PI));
     }
     
