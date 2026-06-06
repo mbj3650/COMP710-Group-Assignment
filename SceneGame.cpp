@@ -87,9 +87,13 @@ SceneGame::SceneGame()
 
 SceneGame::~SceneGame()
 {
-        delete list;
+    delete list;
     delete pathmaker;
     delete m_pCursor;
+    m_pCursor = 0;
+
+    delete m_pCentre;
+    m_pCentre = 0;
     GameData::Destroy();
     for (int i = 0; i < (int)m_enemies.size(); i++)
     {
@@ -386,6 +390,10 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     }
     else
     {
+        if (inputSystem.GetKeyState(SDL_SCANCODE_SPACE) == BS_HELD)
+        {
+            deltaTime *= 2;//run at two times speed
+        }
         // tower interactions
         if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
             // try placing tower

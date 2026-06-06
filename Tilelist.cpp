@@ -24,7 +24,9 @@ Tilelist::~Tilelist()
 		tiles.at(k) = 0;
 	}
 	delete Endflag;
+	Endflag = 0;
 	delete Startflag;
+	Startflag = 0;
 };
 
 bool
@@ -58,7 +60,6 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 
 	path.push_back(GetStart());//add as start node to list
 
-	Endflag = renderer.CreateSprite("..\\assets\\flag.png"); // set sprite
 	Startflag = renderer.CreateSprite("..\\assets\\flag.png"); // set sprite
 	Startflag->SetScale( // set scale to make sure it fits in screen
 		renderer.GetWidth() / (Startflag->GetWidth()/2 * (1.0 * columns))
