@@ -12,6 +12,9 @@ class AnimatedSprite;
 class Tile;
 class Pathmaker;
 class Tilelist;
+class Enemy;
+class DynamicText;
+
 // Class declaration:
 class SceneGame : public Scene
 {
@@ -43,6 +46,27 @@ protected:
 	float m_angle;
 	float m_rotationSpeed;
 	bool moving;
+
+	// enemy / wave stuff
+	Renderer* m_pRenderer;
+	std::vector<Enemy*> m_enemies;
+	float m_fSpawnTimer;
+	float m_fTileSize;
+	int m_iLives;
+
+	// wave tracking
+	int m_iWave;
+	int m_iEnemiesToSpawn;
+	bool m_bWaveComplete;
+
+	// HUD text
+	DynamicText* m_pLivesText;
+	DynamicText* m_pWaveText;
+
+	// game over
+	bool m_bGameOver;
+	Sprite* m_pGameOverSprite;  // show image instead of text when game over
+
 private:
 };
 #endif // SCENEGAME_H
