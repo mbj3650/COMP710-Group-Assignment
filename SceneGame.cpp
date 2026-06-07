@@ -77,7 +77,6 @@ SceneGame::SceneGame()
     m_pRestartText     = 0;
     m_bShowInstructions= true;
     m_pParticleSprite  = 0;
-    testAni = 0;
     for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
         m_pInstructions[i] = 0;
 }
@@ -125,7 +124,6 @@ SceneGame::~SceneGame()
         delete m_pInstructions[i];
         m_pInstructions[i] = 0;
     }
-    delete testAni; testAni = 0;
     UIShopManager::DestroyInstance();
     b2DestroyWorld(WorldPointer);
     delete World;
@@ -228,15 +226,6 @@ bool SceneGame::Initialise(Renderer& renderer)
         soundSystem->CreateSound("..\\assets\\sounds\\game_over.wav");
         soundSystem->CreateSound("..\\assets\\sounds\\new_wave.wav");
     }
-
-    testAni = renderer.CreateAnimatedSprite("..\\assets\\enemies\\Slime.png");
-    testAni->SetupFrames(50, 50);
-    testAni->SetLooping(true);
-    testAni->SetFrameDuration(0.5f);
-    testAni->Animate();
-    testAni->SetX(500);
-    testAni->SetY(500);
-    testAni->SetScale(2.0f);
     return true;
 }
 
@@ -340,7 +329,6 @@ void SceneGame::AddGoldStrikeBonus()
 
 void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 {
-    testAni->Process(deltaTime);
     // --- Instructions overlay ---
     if (m_bShowInstructions)
     {
@@ -587,7 +575,6 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 
 void SceneGame::Draw(Renderer& renderer)
 {
-    testAni->Draw(renderer);
     // Instructions overlay
     if (m_bShowInstructions)
     {

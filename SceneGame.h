@@ -118,7 +118,6 @@ protected:
     Particle  m_particlePool[PARTICLE_POOL_SIZE];
     void      SpawnBurst(float x, float y);   // activates a burst of particles
 
-    AnimatedSprite* testAni;
     // UI
     bool m_bHideUI;
     UIShopManager* m_pShopManager;
