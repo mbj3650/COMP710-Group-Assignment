@@ -1,6 +1,8 @@
 #ifndef UI_SIDEPANEL_H
 #define UI_SIDEPANEL_H
 #include <string>
+#include <vector>
+#include "UIRelicSlot.h"
 class Renderer;
 class Sprite;
 class Tower;
@@ -15,11 +17,12 @@ public:
     ~UISidepanel();
 
     void Initialise(Renderer& renderer);
-    void Process(float deltaTime, InputSystem& input, int* gold);
+    void Process(float deltaTime, InputSystem& input, int* gold, Renderer& renderer);
     void Draw(Renderer& renderer);
     bool IsElementHovered(InputSystem& input) const;
     bool IsSpriteHovered(Sprite* sprite, InputSystem& input) const;
     void SetTower(Renderer& renderer, Tower* tower);
+    void RefreshRelicSlots(Renderer& renderer);
 private:
     UISidepanel(const UISidepanel&);
     UISidepanel& operator=(const UISidepanel&);
@@ -44,6 +47,11 @@ private:
     UIUpgradeButton* m_pUpgrade1;
     UIUpgradeButton* m_pUpgrade2;
     UIUpgradeButton* m_pUpgrade3;
+
+    std::vector<UIRelicSlot*> m_pRelicSlots;
+    DynamicText* m_pRelicNameText;
+    DynamicText* m_pRelicDescText;
+    bool m_bDisplayRelicText;
 };
 
 #endif // UI_SIDEPANEL_H

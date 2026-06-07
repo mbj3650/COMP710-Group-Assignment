@@ -45,6 +45,8 @@
     <ClCompile Include="Pathmaker.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="ProjectileData.cpp" />
+    <ClCompile Include="RelicData.cpp" />
+    <ClCompile Include="RelicManager.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="SceneGame.cpp" />
@@ -58,6 +60,7 @@
     <ClCompile Include="Tilelist.cpp" />
     <ClCompile Include="Tower.cpp" />
     <ClCompile Include="TowerData.cpp" />
+    <ClCompile Include="UIRelicSlot.cpp" />
     <ClCompile Include="UIShopManager.cpp" />
     <ClCompile Include="UIShopSlot.cpp" />
     <ClCompile Include="UISidepanel.cpp" />
@@ -94,6 +97,8 @@
     <ClInclude Include="Pathmaker.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="ProjectileData.h" />
+    <ClInclude Include="RelicData.h" />
+    <ClInclude Include="RelicManager.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="SceneGame.h" />
@@ -107,6 +112,7 @@
     <ClInclude Include="Tilelist.h" />
     <ClInclude Include="Tower.h" />
     <ClInclude Include="TowerData.h" />
+    <ClInclude Include="UIRelicSlot.h" />
     <ClInclude Include="UIShopManager.h" />
     <ClInclude Include="UIShopSlot.h" />
     <ClInclude Include="UISidepanel.h" />

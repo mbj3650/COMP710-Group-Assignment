@@ -1,6 +1,5 @@
 #include "EnemyData.h"
 #include <string>
-
 EnemyData::EnemyData()
 {
 }

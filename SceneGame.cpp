@@ -29,6 +29,7 @@
 #include "GameData.h"
 #include "TowerData.h"
 #include "ProjectileData.h"
+#include "RelicManager.h"
 #include "soundsystem.h"
 #include <iostream>
 #include <string>
@@ -125,6 +126,7 @@ SceneGame::~SceneGame()
         m_pInstructions[i] = 0;
     }
     UIShopManager::DestroyInstance();
+    RelicManager::Destroy();
     b2DestroyWorld(WorldPointer);
     delete World;
     std::cout << "WORLD DESTROYED\n";
@@ -213,6 +215,7 @@ bool SceneGame::Initialise(Renderer& renderer)
 
     // Tower and UI
     GameData::Get().Initialise();
+    RelicManager::Get().Initialise();
 	UIShopManager().GetInstance().Initialise(renderer);
     // adding sound effects
     SoundSystem* soundSystem = Game::GetInstance().GetSoundSystem();
@@ -225,6 +228,7 @@ bool SceneGame::Initialise(Renderer& renderer)
         soundSystem->CreateSound("..\\assets\\sounds\\enemy_damage_player.wav");
         soundSystem->CreateSound("..\\assets\\sounds\\game_over.wav");
         soundSystem->CreateSound("..\\assets\\sounds\\new_wave.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\relic.wav");
     }
     return true;
 }
@@ -462,7 +466,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             m_towers[i]->Process(deltaTime);
         }
 
-        UIShopManager::GetInstance().Process(deltaTime, inputSystem, &m_iGold);
+        UIShopManager::GetInstance().Process(deltaTime, inputSystem, &m_iGold, *m_pRenderer);
 
         for (int i = (int)m_projectiles.size() - 1; i >= 0; i--)//tower process
         {
@@ -522,6 +526,18 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 
         if (m_iEnemiesToSpawn == 0 && m_enemies.empty())
         {
+            if (m_iWave % 10 == 0)
+            {
+                Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\relic.wav");
+                RelicManager::Get().AddRandomRelic(m_towers);
+                UIShopManager::GetInstance().RefreshRelicSlots(*m_pRenderer);
+            }
+            else
+            {
+                Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\new_wave.wav");
+                RelicManager::Get().AddRandomRelic(m_towers);
+                UIShopManager::GetInstance().RefreshRelicSlots(*m_pRenderer);
+            }
             m_iWave++;
             m_iEnemiesToSpawn = m_iWave * ENEMIES_PER_WAVE;
             m_fSpawnTimer = 0.0f;
@@ -529,7 +545,6 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             std::cout << "Wave " << m_iWave << " starting!\n";
 
             // Fresh pay window for the new wave.
-            Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\new_wave.wav");
             m_fWaveTimer        = 0.0f;
             m_bWaveTimerStarted = false;
         }
@@ -708,6 +723,6 @@ void SceneGame::RestartGame(Renderer& renderer)
 
     // Kill all particles
     for (int i = 0; i < PARTICLE_POOL_SIZE; i++) m_particlePool[i].m_bAlive = false;
-
+    RelicManager::Get().Initialise();
     std::cout << "Game restarted.\n";
 }

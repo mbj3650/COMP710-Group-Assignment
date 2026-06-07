@@ -16,13 +16,14 @@ public:
 	static void DestroyInstance();
 
 	void Initialise(Renderer& renderer);
-	void Process(float deltaTime, InputSystem& input, int* m_iGold);
+	void Process(float deltaTime, InputSystem& input, int* m_iGold, Renderer& renderer);
 	void Draw(Renderer& renderer);
 	void UpdateSelection(int slot);
 	std::string GetSelectedTowerType();
 	bool IsTowerSelected() const;
 	bool IsAnyElementHovered(InputSystem& input) const;
 	void SetSidepanelTower(Renderer& renderer, Tower* tower);
+	void RefreshRelicSlots(Renderer& renderer);
 protected:
 	static UIShopManager* sm_pInstance;
 private:

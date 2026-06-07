@@ -39,6 +39,9 @@ public:
     void ApplyExtraCold();
     void ApplyExtraPoison();
 
+    void ApplyRelicEffect(int type);
+    void ApplyAllRelics();
+
 private:
     Projectile(const Projectile&);
     Projectile& operator=(const Projectile&);
@@ -70,6 +73,7 @@ private:
     bool m_bAlive;//general "kill" boolean for projectiles with special conditions
     float lifetime;
     b2ShapeId Target;//NOTE: Please do not make a projectile both pierce and homing at this time
+    std::string projectileID;
 };
 
 #endif // PROJECTILE_H

@@ -15,6 +15,8 @@
 #include "Tower.h"
 #include "GameData.h"
 #include "ProjectileData.h"
+#include "RelicData.h"
+#include "RelicManager.h"
 
 Projectile::Projectile()
 {
@@ -52,7 +54,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     m_bAlive = true;
     max_x = renderer.GetWidth();
     max_y = renderer.GetHeight();
-    
+    projectileID = ProjectileID;
     string SpritePath = "..\\assets\\projectiles\\" + data.Sprite + ".png";
     m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
@@ -102,7 +104,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
         b2Vec2 vel = { (dx / dist) * m_speed, (dy / dist) * m_speed };
         b2Body_SetLinearVelocity(ID, vel);
     }
-
+    ApplyAllRelics();
     return true;
 }
 
@@ -277,6 +279,41 @@ void Projectile::ApplyExtraPoison()
 }
 void Projectile::ApplyExtraSize(float f)
 {
-    scale += f;
+    scale *= f;
     m_pSprite->SetScale(scale);
+}
+
+void Projectile::ApplyRelicEffect(int upgrade)
+{
+    switch (upgrade)
+    {
+        
+        case CrystalShard:
+            if (projectileID == "Dart") ApplyExtraPierce(2);
+            break;
+        case Mushroom:
+            ApplyExtraSize(1.05f);
+            break;
+        case TheTome:
+            if (projectileID == "Frost")
+            {
+                ApplyExtraPierce(2);
+                lifetime += 0.5f;
+                ApplyExtraDamage(1);
+            }
+            break;
+        
+    }
+}
+
+void Projectile::ApplyAllRelics()
+{
+    const auto& relics = RelicManager::Get().ProjectileRelics;
+    for (const auto& pair : relics)
+    {
+        for (int i = 0; i < pair.second; i++) // when you have multiple relics do the effect multiple times
+        {
+            ApplyRelicEffect(GameData::Get().Relic[pair.first].Effect);
+        }
+    }
 }

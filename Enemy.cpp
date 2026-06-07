@@ -84,7 +84,6 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     m_pAniSprite->SetLooping(true);
     m_pAniSprite->SetFrameDuration(0.5f);
     m_pAniSprite->Animate();
-    std::cout << m_pAniSprite->GetWidth() << " blehhh \n";
     // bosses are drawn bigger so the player can tell them apart
     float scalesize = 0.9f;
     if (m_bIsBoss)

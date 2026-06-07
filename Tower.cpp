@@ -14,6 +14,8 @@
 #include "string.h"
 #include "GameData.h"
 #include "TowerData.h"
+#include "RelicData.h"
+#include "RelicManager.h"
 #include "EconomyConfig.h" // tower attack radius config
 Tower::Tower()
 {
@@ -117,7 +119,8 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     m_x = b2Body_GetPosition(ID).x;
     m_y = b2Body_GetPosition(ID).y;
     std::cout << "made tower!\n" << b2Shape_GetUserData(shapeId) << "\n";
-
+    // apply relics to new tower
+    ApplyAllRelics();
     return true;
 }
 
@@ -188,7 +191,7 @@ void Tower::Process(float deltaTime)
         newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), Target, projectileID, speed);//add to it
         if (m_iExtraDamage > 0) newprojectile->ApplyExtraDamage(m_iExtraDamage);
         if (m_iExtraPierce > 0) newprojectile->ApplyExtraPierce(m_iExtraPierce);
-        if (m_fExtraSize > 0.0f) newprojectile->ApplyExtraSize(m_fExtraSize);
+        if (m_fExtraSize > 0.0f) newprojectile->ApplyExtraSize(1.0f+m_fExtraSize);
         if (m_bExtraHoming) newprojectile->ApplyExtraHoming();
         if (m_bExtraToxic) newprojectile->ApplyExtraPoison();
         if (m_bExtraCold) newprojectile->ApplyExtraCold();
@@ -293,65 +296,6 @@ bool Tower::CanUpgrade(int index)
     return false;
 }
 
-void Tower::ApplyUpgrade(int upgrade)
-{
-    std::cout << "Apply Upgrade being ran\n";
-    switch (upgrade)
-    {
-        case Shooter_RapidFire:
-            firedelay -= 1.25f;
-            speed += 4.0f;
-            break;
-        case Shooter_LongRange:
-            range += 3.5f;
-            break;
-        case Shooter_LethalShot:
-            m_iExtraDamage += 1;
-            break;
-        case Iceman_SwiftThrow:
-            firedelay -= 1.0f;
-            break;
-        case Iceman_Coldness:
-            m_bExtraCold = true;
-            break;
-        case Iceman_ThickSnow:
-            m_iExtraPierce += 3;
-            m_iExtraDamage += 1;
-            break;
-        case Poisoner_LongReach:
-            range += 3.0f;
-            break;
-        case Poisoner_ExtraToxic:
-            m_bExtraToxic = true;
-            break;
-        case Poisoner_QuickFog:
-            firedelay -= 1.0f;
-            speed += 1.5f;
-            break;
-        case Detonator_RapidBlast:
-            firedelay -= 1.0f;
-            break;
-        case Detonator_BigBlast:
-            m_fExtraSize += 0.5f;
-            range += 2.0f;
-            break;
-        case Detonator_Firepower:
-            m_iExtraDamage += 2;
-            break;
-        case Boomerang_SpeedyRang:
-            firedelay -= 1.25f;
-            break;
-        case Boomerang_Sharpness:
-            m_iExtraDamage += 2;
-            break;
-        case Boomerang_HeavyRangs:
-            speed -= 5.0f;
-            m_fExtraSize += 0.25f;
-            m_iExtraPierce += 3;
-            break;
-    }
-}
-
 bool Tower::IsTargetingLast()
 {
     return AimForLast;
@@ -359,4 +303,99 @@ bool Tower::IsTargetingLast()
 void Tower::SwapTargeting()
 {
     AimForLast = !AimForLast;
+}
+
+// Upgrades and Relic effects
+void Tower::ApplyUpgrade(int upgrade)
+{
+    std::cout << "Apply Upgrade being ran\n";
+    switch (upgrade)
+    {
+    case Shooter_RapidFire:
+        firedelay -= 1.25f;
+        speed += 4.0f;
+        break;
+    case Shooter_LongRange:
+        range += 3.5f;
+        break;
+    case Shooter_LethalShot:
+        m_iExtraDamage += 1;
+        break;
+    case Iceman_SwiftThrow:
+        firedelay -= 1.0f;
+        break;
+    case Iceman_Coldness:
+        m_bExtraCold = true;
+        break;
+    case Iceman_ThickSnow:
+        m_iExtraPierce += 3;
+        m_iExtraDamage += 1;
+        break;
+    case Poisoner_LongReach:
+        range += 3.0f;
+        break;
+    case Poisoner_ExtraToxic:
+        m_bExtraToxic = true;
+        break;
+    case Poisoner_QuickFog:
+        firedelay -= 1.0f;
+        speed += 1.5f;
+        break;
+    case Detonator_RapidBlast:
+        firedelay -= 1.0f;
+        break;
+    case Detonator_BigBlast:
+        m_fExtraSize += 0.5f;
+        range += 1.0f;
+        break;
+    case Detonator_Firepower:
+        m_iExtraDamage += 2;
+        break;
+    case Boomerang_SpeedyRang:
+        firedelay -= 1.25f;
+        break;
+    case Boomerang_Sharpness:
+        m_iExtraDamage += 2;
+        break;
+    case Boomerang_HeavyRangs:
+        speed -= 5.0f;
+        m_fExtraSize += 0.25f;
+        m_iExtraPierce += 3;
+        break;
+    }
+}
+
+void Tower::ApplyRelicEffect(int upgrade)
+{
+    switch (upgrade)
+    {
+        case RedPotion:
+            m_iExtraDamage += 2;
+            break;
+        case Campfire:
+            if (towerID == "Detonator") firedelay *= 0.95f;
+            break;
+        case Coffee:
+            firedelay *= 0.975f;
+            break;
+        case Sash:
+            if (towerID == "Boomerang") range += 0.1f;
+            break;
+        case Shrimp:
+            if (towerID == "Poisoner") firedelay *= 0.925f;
+            break;
+
+    }
+}
+
+void Tower::ApplyAllRelics()
+{
+    const auto& relics = RelicManager::Get().TowerRelics;
+    for (const auto& pair : relics)
+    {
+        for (int i = 0; i < pair.second; i++) // when you have multiple relics do the effect multiple times
+        {
+            ApplyRelicEffect(GameData::Get().Relic[pair.first].Effect);
+        }
+    }
 }

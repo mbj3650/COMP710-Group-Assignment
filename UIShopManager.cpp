@@ -69,12 +69,12 @@ void UIShopManager::Initialise(Renderer& renderer)
 	m_pSidePanel->Initialise(renderer);
 }
 
-void UIShopManager::Process(float deltaTime, InputSystem& input, int* gold)
+void UIShopManager::Process(float deltaTime, InputSystem& input, int* gold, Renderer& renderer)
 {
 	for (UIShopSlot* slot : m_shopSlots) {
 		slot->Process(deltaTime, input);
 	}
-	m_pSidePanel->Process(deltaTime, input, gold);
+	m_pSidePanel->Process(deltaTime, input, gold, renderer);
 
 
 	if (input.GetMouseButtonState(SDL_BUTTON_RIGHT) == BS_PRESSED)
@@ -134,4 +134,9 @@ bool UIShopManager::IsAnyElementHovered(InputSystem& input) const
 void UIShopManager::SetSidepanelTower(Renderer& renderer, Tower* tower)
 {
 	m_pSidePanel->SetTower(renderer, tower);
+}
+
+void UIShopManager::RefreshRelicSlots(Renderer& renderer)
+{
+	m_pSidePanel->RefreshRelicSlots(renderer);
 }

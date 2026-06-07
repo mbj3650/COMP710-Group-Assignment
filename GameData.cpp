@@ -2,6 +2,7 @@
 #include "ProjectileData.h"
 #include "TowerData.h"
 #include "EnemyData.h"
+#include "RelicData.h"
 #include "IniParser.h"
 #include <map>
 #include <string>
@@ -14,6 +15,9 @@ GameData::~GameData()
 {
 	Tower.clear();
 	Projectile.clear();
+	Enemy.clear();
+	Relic.clear();
+	RelicIDs.clear();
 }
 
 GameData* GameData::sm_pInstance = 0;
@@ -37,6 +41,7 @@ void GameData::Initialise()
 	LoadTowerData();
 	LoadProjectileData();
 	LoadEnemyData();
+	LoadRelicData();
 }
 void GameData::LoadTowerData()
 {
@@ -98,5 +103,21 @@ void GameData::LoadEnemyData()
 		Parser.GetValueAsInt(section + "|SpriteSizeX"),
 		Parser.GetValueAsInt(section + "|SpriteSizeY")
 		)});
+	}
+}
+void GameData::LoadRelicData()
+{
+	IniParser Parser;
+	Parser.LoadIniFile("..\\assets\\info\\relic.ini");
+	for (const string section : Parser.sections)
+	{
+		Relic.insert({ section, RelicData(
+		Parser.GetValueAsString(section + "|Sprite"),
+		Parser.GetValueAsString(section + "|Name"),
+		Parser.GetValueAsString(section + "|Description"),
+		Parser.GetValueAsString(section + "|Imbues"),
+		Parser.GetValueAsInt(section + "|Effect")
+		)});
+		RelicIDs.push_back(section);
 	}
 }

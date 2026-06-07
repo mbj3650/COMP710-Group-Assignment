@@ -69,6 +69,9 @@ public:
 
     bool IsTargetingLast();
     void SwapTargeting();
+
+    void ApplyRelicEffect(int type);
+    void ApplyAllRelics();
 protected:
 private:
 	Tower(const Tower& Tower);
