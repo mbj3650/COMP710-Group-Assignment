@@ -169,6 +169,7 @@ void Tower::Process(float deltaTime)
     b2ShapeId Target;
     if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
         if (AimForLast) {//check if we're aiming for the last enemy 
+            std::cout << "AIMING FOR LAST\n";
             Target = EnemyInRadius.at(EnemyInRadius.size() - 1);//if so aim at last enemy
         }
         else {//else aim at first enemy
@@ -184,7 +185,7 @@ void Tower::Process(float deltaTime)
     else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius 
         std::cout << "firing!\n";
         Projectile* newprojectile = new Projectile();//make new projectile
-        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), Target, projectileID, speed);//add to it
         if (m_iExtraDamage > 0) newprojectile->ApplyExtraDamage(m_iExtraDamage);
         if (m_iExtraPierce > 0) newprojectile->ApplyExtraPierce(m_iExtraPierce);
         if (m_fExtraSize > 0.0f) newprojectile->ApplyExtraSize(m_fExtraSize);

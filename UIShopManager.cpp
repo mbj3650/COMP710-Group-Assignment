@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <SDL.h>
+#include "inputsystem.h"
 UIShopManager::UIShopManager() :
 	m_iSelectedSlot(-1),
 	m_pSidePanel(0)
@@ -73,6 +75,12 @@ void UIShopManager::Process(float deltaTime, InputSystem& input, int* gold)
 		slot->Process(deltaTime, input);
 	}
 	m_pSidePanel->Process(deltaTime, input, gold);
+
+
+	if (input.GetMouseButtonState(SDL_BUTTON_RIGHT) == BS_PRESSED)
+	{
+		UpdateSelection(-1);
+	}
 }
 void UIShopManager::Draw(Renderer& renderer)
 {
