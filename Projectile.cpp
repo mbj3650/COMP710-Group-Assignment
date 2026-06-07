@@ -269,9 +269,9 @@ void Projectile::ApplyExtraHoming()
 }
 void Projectile::ApplyExtraCold()
 {
-    effect = 2;
+    effect = 3;
 }
 void Projectile::ApplyExtraPoison()
 {
-    effect = 3;
+    effect = 4;
 }

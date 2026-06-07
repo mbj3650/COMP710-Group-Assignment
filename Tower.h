@@ -28,6 +28,12 @@ enum UpgradeID
     Poisoner_LongReach = 7,
     Poisoner_ExtraToxic = 8,
     Poisoner_QuickFog = 9,
+    Detonator_u1 = 10,
+    Detonator_u2 = 11,
+    Detonator_u3 = 12,
+    Boomerang_u1 = 13,
+    Boomerang_u2 = 14,
+    Boomerang_u3 = 15,
 };
 // Class declaration:
 class Tower
@@ -60,6 +66,9 @@ public:
     bool Upgrade(int index, int* gold);
     bool CanUpgrade(int index);
     void ApplyUpgrade(int upgrade);
+
+    bool IsTargetingLast();
+    void SwapTargeting();
 protected:
 private:
 	Tower(const Tower& Tower);

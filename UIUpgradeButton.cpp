@@ -65,12 +65,12 @@ void UIUpgradeButton::Initialise(Renderer& renderer, int x, int y, int index)
 	m_iArtY = btnY - 10;
 
 	m_pUpgradeText = new DynamicText();
-	m_pUpgradeText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 40, false);
+	m_pUpgradeText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 36, false);
 	m_pUpgradeText->SetText(renderer, "Rapid Fire");
 	m_pUpgradeText->SetPosition(btnX - 40, btnY - 40);
 
 	m_pDescriptionText = new DynamicText();
-	m_pDescriptionText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 24, false);
+	m_pDescriptionText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 22, false);
 	m_pDescriptionText->SetText(renderer, "Attacks way faster");
 	m_pDescriptionText->SetPosition(btnX - 40, btnY + 10);
 

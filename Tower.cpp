@@ -327,3 +327,12 @@ void Tower::ApplyUpgrade(int upgrade)
             break;
     }
 }
+
+bool Tower::IsTargetingLast()
+{
+    return AimForLast;
+}
+void Tower::SwapTargeting()
+{
+    AimForLast = !AimForLast;
+}

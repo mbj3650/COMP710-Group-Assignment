@@ -33,6 +33,13 @@ private:
     Sprite* m_pSellSprite;
 	DynamicText* m_pSellText;
 
+    // target button
+    Sprite* m_pTargetFirstSprite;
+    Sprite* m_pTargetLastSprite;
+    Sprite* m_pSprites[2];
+    int m_iSpriteIndex;
+	DynamicText* m_pTargetText;
+
     // upgrade buttons
     UIUpgradeButton* m_pUpgrade1;
     UIUpgradeButton* m_pUpgrade2;
