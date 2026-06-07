@@ -106,15 +106,16 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     b2BodyDef WorldObj = b2DefaultBodyDef();
     WorldObj.position  = { m_x, m_y };
     ID = b2CreateBody(WorldID, &WorldObj);
-    b2Body_SetType(ID, b2_dynamicBody);
+    b2Body_SetType(ID, b2_kinematicBody);
     b2Body_SetUserData(ID, this);
-
+    //b2Body_EnableContactEvents(ID, true);
+    //b2Body_EnableHitEvents(ID, true);
     b2Polygon box = b2MakeRoundedBox(6 * scale, 6 * scale, 5.0f);
     b2ShapeDef shapeDef   = b2DefaultShapeDef();
     shapeDef.density      = 1.0f;
     shapeDef.friction     = 0.1f;
     shapeDef.filter.categoryBits = 0x0002;
-    shapeDef.filter.maskBits  = 0x0002 | 0x0001 | 0x0003;
+    shapeDef.filter.maskBits  = 0x0001 | 0x0003;
     shapeId = b2CreatePolygonShape(ID, &shapeDef, &box);
     b2Shape_SetUserData(shapeId, this);
     m_pAniSprite->SetX(b2Body_GetPosition(ID).x);

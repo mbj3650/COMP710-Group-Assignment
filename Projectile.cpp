@@ -84,7 +84,7 @@ bool Projectile::Initialise(Renderer& renderer, Tower* owner, float tileSize, b2
     if (isboomerang) {
         specialtimer = 2.5;//set timer that will let it hit towers after a certain period
     }
-    shapeDef.filter.maskBits = 0x0002;//detect enemies
+    shapeDef.filter.maskBits = 0x0012;//detect enemies
     
     shapeDef.isSensor = true;//set it to be a sensor
     shapeId = b2CreatePolygonShape(ID, &shapeDef, &box);

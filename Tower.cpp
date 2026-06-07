@@ -104,7 +104,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     shapeDef.density = 1.0f;
     shapeDef.friction = 0.1f;
     shapeDef.filter.categoryBits = 0x0001;
-    shapeDef.filter.maskBits = 0x0002;//detect enemies
+    shapeDef.filter.maskBits = 0x0012;//detect enemies
     shapeDef.isSensor = true;//set it to be a sensor
    
     shapeId = b2CreateCircleShape(ID, &shapeDef, &circleShape);
