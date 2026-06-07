@@ -13,6 +13,7 @@ Tile::Tile()
 {
 	m_pSprite = 0;
 	m_pSpriteSand = 0;
+	m_pSpriteOutline = 0;
 	// initialise everything so we dont get random garbage values on startup
 	isPath = false;
 	isStart = false;
@@ -26,14 +27,31 @@ Tile::~Tile()
 {
 	delete m_pSprite;
 	delete m_pSpriteSand;
+	delete m_pSpriteOutline;
 };
 
 bool
 Tile::Initialise(Renderer& renderer, Vector2 Pos, int rows, int columns)
 {
 	Position = Pos; // set position
-	m_pSprite = renderer.CreateSprite("..\\assets\\stone4.png"); // set sprite
 	
+	int obstaclecheck = GetRandom(0, 50);
+	if (obstaclecheck == 1) {
+		isObstacle = true;
+	}
+	
+
+	if (!isObstacle) {
+		m_pSprite = renderer.CreateSprite("..\\assets\\stone4.png"); // set sprite
+	}
+	else {
+		m_pSprite = renderer.CreateSprite("..\\assets\\stone_obstacle.png"); // set sprite
+	}
+	
+	m_pSpriteSand = renderer.CreateSprite("..\\assets\\stone5.png"); // set sprite
+	m_pSpriteOutline = renderer.CreateSprite("..\\assets\\stone5_outline.png"); // set sprite
+
+
 	m_pSprite->SetScale( // set scale to make sure it fits in screen
 		renderer.GetWidth() / (m_pSprite->GetWidth() * (1.0 * columns))
 	);
@@ -41,17 +59,24 @@ Tile::Initialise(Renderer& renderer, Vector2 Pos, int rows, int columns)
 	m_pSprite->SetX(Position.x * m_pSprite->GetWidth() + (m_pSprite->GetWidth() / 2));
 	m_pSprite->SetY(Position.y * m_pSprite->GetWidth() + (m_pSprite->GetWidth() / 2));
 
-	m_pSpriteSand = renderer.CreateSprite("..\\assets\\stone5.png"); // set sprite
+
 	m_pSpriteSand->SetScale( // set scale to make sure it fits in screen
 		renderer.GetWidth() / (m_pSpriteSand->GetWidth() * (1.0 * columns))
 	);
-
 	m_pSpriteSand->SetX(Position.x * m_pSpriteSand->GetWidth() + (m_pSpriteSand->GetWidth() / 2));//sand sprite for if its a path
 	m_pSpriteSand->SetY(Position.y * m_pSpriteSand->GetWidth() + (m_pSpriteSand->GetWidth() / 2));
 	m_pSpriteSand->SetScale(m_pSpriteSand->GetScale() * 1.25);
+
+
+	m_pSpriteOutline->SetScale( // set scale to make sure it fits in screen
+		renderer.GetWidth() / (m_pSpriteOutline->GetWidth() * (1.0 * columns))
+	);
+	m_pSpriteOutline->SetX(Position.x * m_pSpriteOutline->GetWidth() + (m_pSpriteOutline->GetWidth() / 2));//sand sprite for if its a path
+	m_pSpriteOutline->SetY(Position.y * m_pSpriteOutline->GetWidth() + (m_pSpriteOutline->GetWidth() / 2));
+	m_pSpriteOutline->SetScale(m_pSpriteOutline->GetScale() * 1.25);
 	Sprites[0] = m_pSprite;
 	Sprites[1] = m_pSpriteSand;
-	
+	Sprites[2] = m_pSpriteOutline;
 	currentsprite = 0;
 	return true;
 };
@@ -65,11 +90,14 @@ Tile::Process(float deltaTime)
 void Tile::setStart()
 {
 	isStart = true;
+	isObstacle = false;
+	//make sure it can be pathed to
 }
 
 void Tile::setEnd()
 {
 	isEnd = true;
+	isObstacle = false;//make sure it can be pathed to
 }
 
 void Tile::setNext(Tile* NextPosition)
@@ -99,7 +127,7 @@ void Tile::Undo() // reset the address of the next tile
 void
 Tile::UpdateDraw() // changes tile color based on its status
 {
-	if (isPath)
+	if (isPath || isStart)
 	{
 		currentsprite = 1;
 	}
@@ -128,7 +156,13 @@ Tile::UpdateDraw() // changes tile color based on its status
 void
 Tile::Draw(Renderer& renderer)
 {
-	Sprites[currentsprite]->Draw(renderer);
+	Sprites[currentsprite]->Draw(renderer);	
+};
+
+void
+Tile::DrawPaths(Renderer& renderer)
+{
+	Sprites[2]->Draw(renderer);
 };
 
 int Tile::GetWidth() {

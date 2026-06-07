@@ -38,13 +38,15 @@ public:
 	Vector2 Position;
 	Sprite* m_pSprite;
 	Sprite* m_pSpriteSand;
-	Sprite* Sprites[2];
+	Sprite* m_pSpriteOutline;
+	Sprite* Sprites[3];
 	int currentsprite;
 	bool isPath;
 	bool isStart;
 	bool hastower;
 	bool isEnd;
 	bool hovered;
+	bool isObstacle;
 	int Connections;//if has more than 2 connections, something has gone wrong and we must not allow the player to continue as long as theres 3+ connections 
 	Tile* PrevPosition;
 	Tile* NextPosition;

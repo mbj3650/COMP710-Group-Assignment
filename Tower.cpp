@@ -172,7 +172,7 @@ void Tower::Process(float deltaTime)
     b2ShapeId Target;
     if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius
         if (AimForLast) {//check if we're aiming for the last enemy 
-            std::cout << "AIMING FOR LAST\n";
+            //std::cout << "AIMING FOR LAST\n";
             Target = EnemyInRadius.at(EnemyInRadius.size() - 1);//if so aim at last enemy
         }
         else {//else aim at first enemy
