@@ -31,6 +31,13 @@ public:
     float GetX() const { return m_x; }
     float GetY() const { return m_y; }
 
+    // apply extra (for upgrades)
+    void ApplyExtraDamage(int dmg);
+    void ApplyExtraPierce(int dmg);
+    void ApplyExtraHoming();
+    void ApplyExtraCold();
+    void ApplyExtraPoison();
+
 private:
     Projectile(const Projectile&);
     Projectile& operator=(const Projectile&);

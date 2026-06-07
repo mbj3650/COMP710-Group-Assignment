@@ -77,7 +77,7 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     m_iUpgrade3Price = data.Upgrade3Price;
     m_iTowerIDUpgrade = data.ID;
     //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
-    canhome = false;
+    m_bExtraHoming = false;
     m_projectiles = &projectileaddress;
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
@@ -169,6 +169,11 @@ void Tower::Process(float deltaTime)
         std::cout << "firing!\n";
         Projectile* newprojectile = new Projectile();//make new projectile
         newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
+        if (m_iExtraDamage > 0) newprojectile->ApplyExtraDamage(m_iExtraDamage);
+        if (m_iExtraPierce > 0) newprojectile->ApplyExtraPierce(m_iExtraPierce);
+        if (m_bExtraHoming) newprojectile->ApplyExtraHoming();
+        if (m_bExtraToxic) newprojectile->ApplyExtraPoison();
+        if (m_bExtraCold) newprojectile->ApplyExtraCold();
         m_projectiles->push_back(newprojectile);//
         firetimer = firedelay;
     }
@@ -229,7 +234,8 @@ bool Tower::Upgrade(int index, int* gold)
         {
             m_bUpgrade1 = true;
             *gold -= m_iUpgrade1Price;
-            ApplyUpgrade(static_cast<UpgradeID>(3 * m_iTowerIDUpgrade + 1));
+            Price += m_iUpgrade1Price;
+            ApplyUpgrade(3 * m_iTowerIDUpgrade + 1);
             return true;
         }
         break;
@@ -238,7 +244,8 @@ bool Tower::Upgrade(int index, int* gold)
         {
             m_bUpgrade2 = true;
             *gold -= m_iUpgrade2Price;
-            ApplyUpgrade(static_cast<UpgradeID>(3 * m_iTowerIDUpgrade + 2));
+            Price += m_iUpgrade2Price;
+            ApplyUpgrade(3 * m_iTowerIDUpgrade + 2);
             return true;
         }
         break;
@@ -247,7 +254,8 @@ bool Tower::Upgrade(int index, int* gold)
         {
             m_bUpgrade3 = true;
             *gold -= m_iUpgrade3Price;
-            ApplyUpgrade(static_cast<UpgradeID>(3 * m_iTowerIDUpgrade + 3));
+            Price += m_iUpgrade3Price;
+            ApplyUpgrade(3 * m_iTowerIDUpgrade + 3);
             return true;
         }
         break;
@@ -269,37 +277,39 @@ bool Tower::CanUpgrade(int index)
     return false;
 }
 
-void Tower::ApplyUpgrade(UpgradeID upgrade)
+void Tower::ApplyUpgrade(int upgrade)
 {
+    std::cout << "Apply Upgrade being ran\n";
     switch (upgrade)
     {
         case Shooter_RapidFire:
-            firedelay -= 0.5f;
-            speed += 0.5f;
+            firedelay -= 1.25f;
+            speed += 4.0f;
             break;
         case Shooter_LongRange:
-            range += 1.5f;
+            range += 3.5f;
             break;
         case Shooter_LethalShot:
-            m_iBonusDamage += 1;
+            m_iExtraDamage += 2;
             break;
         case Iceman_SwiftThrow:
-            firedelay -= 0.5f;
+            firedelay -= 1.0f;
             break;
         case Iceman_Coldness:
-            // Unfinished
+            m_bExtraCold = true;
             break;
-        case Iceman_SeekingSnow:
-            // Unfinished
+        case Iceman_ThickSnow:
+            m_iExtraPierce += 3;
             break;
         case Poisoner_LongReach:
-            range += 1.0f;
+            range += 3.0f;
             break;
         case Poisoner_ExtraToxic:
-            // Unfinished
+            m_bExtraToxic = true;
             break;
-        case Poisoner_ThickFog:
-            // Unfinished
+        case Poisoner_QuickFog:
+            firedelay -= 1.0f;
+            speed += 3.5f;
             break;
     }
 }

@@ -24,10 +24,10 @@ enum UpgradeID
     Shooter_LethalShot = 3,
     Iceman_SwiftThrow = 4,
     Iceman_Coldness = 5,
-    Iceman_SeekingSnow = 6,
+    Iceman_ThickSnow = 6,
     Poisoner_LongReach = 7,
     Poisoner_ExtraToxic = 8,
-    Poisoner_ThickFog = 9,
+    Poisoner_QuickFog = 9,
 };
 // Class declaration:
 class Tower
@@ -59,7 +59,7 @@ public:
     Sprite* GetUpgradeSprite(int index);
     bool Upgrade(int index, int* gold);
     bool CanUpgrade(int index);
-    void ApplyUpgrade(UpgradeID upgrade);
+    void ApplyUpgrade(int upgrade);
 protected:
 private:
 	Tower(const Tower& Tower);
@@ -88,7 +88,6 @@ private:
 
     //information for the projectile
     std::string projectileID;
-    bool canhome;
     int Price;
     float range;
     float speed;    
@@ -109,7 +108,12 @@ private:
     int m_iUpgrade2Price;
     int m_iUpgrade3Price;
 
-    int m_iBonusDamage;
+    // upgrades
+    int m_iExtraDamage;
+    bool m_bExtraCold;
+    bool m_bExtraToxic;
+    bool m_bExtraHoming;
+    int m_iExtraPierce;
 };
 
 #endif // __TOWER_H__
