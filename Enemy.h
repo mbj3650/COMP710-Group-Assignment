@@ -4,6 +4,7 @@
 // Modified by: MartinYan12138y
 // Changes: Added HP system (TakeDamage, IsDead) for tower damage integration,
 //          GetX/GetY accessors for particle effects.
+//          Boss enemy every 10th wave (more hp, slower, heals over time).
 
 #ifndef ENEMY_H
 #define ENEMY_H
@@ -36,6 +37,9 @@ public:
     bool IsDead()     const { return m_iHP <= 0; }
     int  GetHP()      const { return m_iHP; }
     int  GetMaxHP()   const { return m_iMaxHP; }
+
+    //tells you if this enemy is a boss (the 10th wave one)
+    bool IsBoss()     const { return m_bIsBoss; }
 
     //effect system
     void TakeEffect(int amount);
@@ -72,6 +76,10 @@ private:
     float poisontimer;
     int poisoncount;
     float slowtimer;
+
+    //boss stuff
+    bool m_bIsBoss;//is this a boss enemy or not
+    float regentimer;//timer for healing hp back, only used by boss
 };
 
 #endif // ENEMY_H

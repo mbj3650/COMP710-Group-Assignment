@@ -57,7 +57,7 @@ const char* INSTRUCTION_LINES[NUM_INSTRUCTION_LINES] = {
 };
 
 SceneGame::SceneGame()
-    : m_pCentre(0), m_angle(0.0f), m_rotationSpeed(1.0f)
+    :  m_angle(0.0f), m_rotationSpeed(1.0f)
 {
     m_pRenderer        = 0;
     m_fSpawnTimer      = 0.0f;
@@ -87,11 +87,13 @@ SceneGame::SceneGame()
 
 SceneGame::~SceneGame()
 {
-        delete list;
+    delete list;
     delete pathmaker;
+    delete m_pCursor;
+    m_pCursor = 0;
+
     delete m_pCentre;
     m_pCentre = 0;
-
     GameData::Destroy();
     for (int i = 0; i < (int)m_enemies.size(); i++)
     {
@@ -172,7 +174,8 @@ bool SceneGame::Initialise(Renderer& renderer)
         m_pGameOverSprite->SetY(H / 2);
     }
 
-
+    m_pCursor = renderer.CreateSprite("..\\assets\\cursor.png"); // set sprite
+    m_pCursor->SetScale(0.1);
     // Particles -- pre-initialise pool with shared explosion sprite
     m_pParticleSprite = renderer.CreateSprite(EXPLOSION_PATH);
     if (m_pParticleSprite)
@@ -367,6 +370,10 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     // --- Normal game ---
     list->Process(deltaTime, inputSystem);
 
+    //PROCESS CURSOR!
+    m_pCursor->SetX(inputSystem.GetMousePosition().x + m_pCursor->GetWidth() / 2);
+    m_pCursor->SetY(inputSystem.GetMousePosition().y+ m_pCursor->GetHeight()/2);
+
     if (moving)
     {
         // MovePosition(xoffset, yoffset): xoffset moves COLUMN (x), yoffset moves ROW (y).
@@ -386,6 +393,10 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     }
     else
     {
+        if (inputSystem.GetKeyState(SDL_SCANCODE_SPACE) == BS_HELD)
+        {
+            deltaTime *= 2;//run at two times speed
+        }
         // tower interactions
         if (inputSystem.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED) {
             // try placing tower
@@ -620,6 +631,7 @@ void SceneGame::Draw(Renderer& renderer)
             UIShopManager::GetInstance().Draw(renderer);
         }
     }
+    m_pCursor->Draw(renderer);
 }
 
 void SceneGame::DebugDraw()

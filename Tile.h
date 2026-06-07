@@ -18,6 +18,7 @@ public:
 	void Process(float deltaTime);
 	void UpdateDraw();//manually called to update a tile to change its appearance 
 	void Draw(Renderer& renderer);
+	void DrawPaths(Renderer& renderer);
 	int GetWidth();
 	void setStart();//set as start
 	void setEnd();

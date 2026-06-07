@@ -33,23 +33,22 @@ Tile::Initialise(Renderer& renderer, Vector2 Pos, int rows, int columns)
 {
 	Position = Pos; // set position
 	m_pSprite = renderer.CreateSprite("..\\assets\\stone4.png"); // set sprite
-	m_pSpriteSand = renderer.CreateSprite("..\\assets\\stone5.png"); // set sprite
-	
 	
 	m_pSprite->SetScale( // set scale to make sure it fits in screen
 		renderer.GetWidth() / (m_pSprite->GetWidth() * (1.0 * columns))
 	);
 
+	m_pSprite->SetX(Position.x * m_pSprite->GetWidth() + (m_pSprite->GetWidth() / 2));
+	m_pSprite->SetY(Position.y * m_pSprite->GetWidth() + (m_pSprite->GetWidth() / 2));
+
+	m_pSpriteSand = renderer.CreateSprite("..\\assets\\stone5.png"); // set sprite
 	m_pSpriteSand->SetScale( // set scale to make sure it fits in screen
 		renderer.GetWidth() / (m_pSpriteSand->GetWidth() * (1.0 * columns))
 	);
 
-	m_pSprite->SetX(Position.x * m_pSprite->GetWidth() + (m_pSprite->GetWidth() / 2));
-	m_pSprite->SetY(Position.y * m_pSprite->GetWidth() + (m_pSprite->GetWidth() / 2));
-
 	m_pSpriteSand->SetX(Position.x * m_pSpriteSand->GetWidth() + (m_pSpriteSand->GetWidth() / 2));//sand sprite for if its a path
 	m_pSpriteSand->SetY(Position.y * m_pSpriteSand->GetWidth() + (m_pSpriteSand->GetWidth() / 2));
-	
+	m_pSpriteSand->SetScale(m_pSpriteSand->GetScale() * 1.25);
 	Sprites[0] = m_pSprite;
 	Sprites[1] = m_pSpriteSand;
 	
@@ -100,17 +99,7 @@ void Tile::Undo() // reset the address of the next tile
 void
 Tile::UpdateDraw() // changes tile color based on its status
 {
-	if (isEnd)
-	{
-		Sprites[currentsprite]->SetBlueTint(0);
-		Sprites[currentsprite]->SetGreenTint(0);
-	}
-	else if (isStart)
-	{
-		Sprites[currentsprite]->SetRedTint(0);
-		Sprites[currentsprite]->SetGreenTint(0);
-	}
-	else if (isPath)
+	if (isPath)
 	{
 		currentsprite = 1;
 	}
@@ -139,7 +128,7 @@ Tile::UpdateDraw() // changes tile color based on its status
 void
 Tile::Draw(Renderer& renderer)
 {
-		Sprites[currentsprite]->Draw(renderer);
+	Sprites[currentsprite]->Draw(renderer);
 };
 
 int Tile::GetWidth() {

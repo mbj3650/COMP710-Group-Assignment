@@ -62,6 +62,7 @@ private:
 
 protected:
     Sprite*    m_pCentre;
+    Sprite*    m_pCursor;
     float      m_angle;
     float      m_rotationSpeed;
 
