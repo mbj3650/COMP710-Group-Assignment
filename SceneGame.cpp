@@ -458,6 +458,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             if (m_towers[i]->IsSold())
             {
                 m_towers[i]->GetCurrentTile()->hastower = false;
+                UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, 0); // remove sidepanel tower
                 AddGold(m_towers[i]->GetSellValue()); // refund half the tower's price
                 delete m_towers[i];
                 m_towers.erase(m_towers.begin() + i);

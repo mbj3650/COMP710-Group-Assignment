@@ -32,8 +32,9 @@ public:
     float GetY() const { return m_y; }
 
     // apply extra (for upgrades)
-    void ApplyExtraDamage(int dmg);
-    void ApplyExtraPierce(int dmg);
+    void ApplyExtraDamage(int damage);
+    void ApplyExtraPierce(int pierce);
+    void ApplyExtraSize(float scale);
     void ApplyExtraHoming();
     void ApplyExtraCold();
     void ApplyExtraPoison();

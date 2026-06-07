@@ -187,6 +187,7 @@ void Tower::Process(float deltaTime)
         newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
         if (m_iExtraDamage > 0) newprojectile->ApplyExtraDamage(m_iExtraDamage);
         if (m_iExtraPierce > 0) newprojectile->ApplyExtraPierce(m_iExtraPierce);
+        if (m_fExtraSize > 0.0f) newprojectile->ApplyExtraSize(m_fExtraSize);
         if (m_bExtraHoming) newprojectile->ApplyExtraHoming();
         if (m_bExtraToxic) newprojectile->ApplyExtraPoison();
         if (m_bExtraCold) newprojectile->ApplyExtraCold();
@@ -304,7 +305,7 @@ void Tower::ApplyUpgrade(int upgrade)
             range += 3.5f;
             break;
         case Shooter_LethalShot:
-            m_iExtraDamage += 2;
+            m_iExtraDamage += 1;
             break;
         case Iceman_SwiftThrow:
             firedelay -= 1.0f;
@@ -314,6 +315,7 @@ void Tower::ApplyUpgrade(int upgrade)
             break;
         case Iceman_ThickSnow:
             m_iExtraPierce += 3;
+            m_iExtraDamage += 1;
             break;
         case Poisoner_LongReach:
             range += 3.0f;
@@ -323,7 +325,28 @@ void Tower::ApplyUpgrade(int upgrade)
             break;
         case Poisoner_QuickFog:
             firedelay -= 1.0f;
-            speed += 3.5f;
+            speed += 1.5f;
+            break;
+        case Detonator_RapidBlast:
+            firedelay -= 1.0f;
+            break;
+        case Detonator_BigBlast:
+            m_fExtraSize += 0.5f;
+            range += 2.0f;
+            break;
+        case Detonator_Firepower:
+            m_iExtraDamage += 2;
+            break;
+        case Boomerang_SpeedyRang:
+            firedelay -= 1.25f;
+            break;
+        case Boomerang_Sharpness:
+            m_iExtraDamage += 2;
+            break;
+        case Boomerang_HeavyRangs:
+            speed -= 5.0f;
+            m_fExtraSize += 0.25f;
+            m_iExtraPierce += 3;
             break;
     }
 }

@@ -28,12 +28,12 @@ enum UpgradeID
     Poisoner_LongReach = 7,
     Poisoner_ExtraToxic = 8,
     Poisoner_QuickFog = 9,
-    Detonator_u1 = 10,
-    Detonator_u2 = 11,
-    Detonator_u3 = 12,
-    Boomerang_u1 = 13,
-    Boomerang_u2 = 14,
-    Boomerang_u3 = 15,
+    Detonator_RapidBlast = 10,
+    Detonator_BigBlast = 11,
+    Detonator_Firepower = 12,
+    Boomerang_SpeedyRang = 13,
+    Boomerang_Sharpness = 14,
+    Boomerang_HeavyRangs = 15,
 };
 // Class declaration:
 class Tower
@@ -126,6 +126,7 @@ private:
     bool m_bExtraToxic;
     bool m_bExtraHoming;
     int m_iExtraPierce;
+    float m_fExtraSize;
 };
 
 #endif // __TOWER_H__

@@ -275,3 +275,8 @@ void Projectile::ApplyExtraPoison()
 {
     effect = 4;
 }
+void Projectile::ApplyExtraSize(float f)
+{
+    scale += f;
+    m_pSprite->SetScale(scale);
+}
