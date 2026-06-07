@@ -132,6 +132,8 @@ void Enemy::TakeEffect(int effect)
         FROST,
         POISON,
         HEATED,
+        EXTRAFROST,
+        EXTRAPOISON,
     };
     switch (effect) {
         case FROST:
@@ -143,6 +145,13 @@ void Enemy::TakeEffect(int effect)
             break;
         case HEATED://if slowed, melt undo that effcet
             slowtimer = 0;
+            break;
+        case EXTRAFROST:
+            slowtimer = 4;
+            break;
+        case EXTRAPOISON:
+            poisoncount += 5;
+            poisontimer = 0.5;
             break;
     }
 }
@@ -219,7 +228,10 @@ void Enemy::Process(float deltaTime)
     else
     {
         b2Vec2 vel = { (dx / dist) * m_speed, (dy / dist) * m_speed };//set speed
-        if (slowtimer > 0) {//if slow
+        if (slowtimer > 2) {//if super slow
+            vel = { vel.x * 0.33f, vel.y * 0.33f };// 1/3 speed
+        }    
+        else if (slowtimer > 0) {//if slow
             vel = { vel.x * 0.5f, vel.y * 0.5f };//halve speed instead
         }    
         b2Body_SetLinearVelocity(ID, vel);

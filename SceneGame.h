@@ -92,6 +92,7 @@ protected:
 
     // --- Economy (Gold) ---
     int          m_iGold;
+    int          m_iGoldPrev;
     DynamicText* m_pGoldText;
     float        m_fWaveTimer;         // seconds since the first enemy of this wave spawned
     bool         m_bWaveTimerStarted;  // pay window only starts ticking once enemies appear

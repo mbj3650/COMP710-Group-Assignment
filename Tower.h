@@ -17,6 +17,24 @@ struct b2BodyId;
 class Enemy;
 class Renderer;
 
+enum UpgradeID
+{
+    Shooter_RapidFire = 1,
+    Shooter_LongRange = 2,
+    Shooter_LethalShot = 3,
+    Iceman_SwiftThrow = 4,
+    Iceman_Coldness = 5,
+    Iceman_ThickSnow = 6,
+    Poisoner_LongReach = 7,
+    Poisoner_ExtraToxic = 8,
+    Poisoner_QuickFog = 9,
+    Detonator_u1 = 10,
+    Detonator_u2 = 11,
+    Detonator_u3 = 12,
+    Boomerang_u1 = 13,
+    Boomerang_u2 = 14,
+    Boomerang_u3 = 15,
+};
 // Class declaration:
 class Tower
 {
@@ -44,8 +62,14 @@ public:
     void Sell();
 	bool IsSold() const { return m_bSelling; }
     int GetSellValue() const;
-protected:
+    Sprite* GetUpgradeSprite(int index);
+    bool Upgrade(int index, int* gold);
+    bool CanUpgrade(int index);
+    void ApplyUpgrade(int upgrade);
 
+    bool IsTargetingLast();
+    void SwapTargeting();
+protected:
 private:
 	Tower(const Tower& Tower);
 	Tower& operator=(const Tower& Tower);
@@ -74,7 +98,6 @@ private:
 
     //information for the projectile
     std::string projectileID;
-    bool canhome;
     int Price;
     float range;
     float speed;    
@@ -85,7 +108,24 @@ private:
 
     // sidepanel
     std::string towerID;
+    int m_iTowerIDUpgrade;
     bool m_bSelling;
+    Sprite* m_pUpgrade1Sprite;
+    Sprite* m_pUpgrade2Sprite;
+    Sprite* m_pUpgrade3Sprite;
+    bool m_bUpgrade1;
+    bool m_bUpgrade2;
+    bool m_bUpgrade3;
+    int m_iUpgrade1Price;
+    int m_iUpgrade2Price;
+    int m_iUpgrade3Price;
+
+    // upgrades
+    int m_iExtraDamage;
+    bool m_bExtraCold;
+    bool m_bExtraToxic;
+    bool m_bExtraHoming;
+    int m_iExtraPierce;
 };
 
 #endif // __TOWER_H__

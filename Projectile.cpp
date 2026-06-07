@@ -252,3 +252,26 @@ bool Projectile::GetAlive() {
     }
     
 }
+
+void Projectile::ApplyExtraDamage(int i)
+{
+    damage += i;
+}
+
+void Projectile::ApplyExtraPierce(int i)
+{
+    maxenemies += i;
+}
+
+void Projectile::ApplyExtraHoming()
+{
+    ishoming = true;
+}
+void Projectile::ApplyExtraCold()
+{
+    effect = 3;
+}
+void Projectile::ApplyExtraPoison()
+{
+    effect = 4;
+}

@@ -22,6 +22,9 @@ Tower::Tower()
     m_x = 0;
     m_y = 0;
     m_tileSize = 40.0f;
+    m_pUpgrade1Sprite = 0;
+    m_pUpgrade2Sprite = 0;
+    m_pUpgrade3Sprite = 0;
 }
 
 Tower::~Tower()
@@ -32,6 +35,13 @@ Tower::~Tower()
     }
     delete m_pSprite;
     m_pSprite = 0;
+
+    delete m_pUpgrade1Sprite;
+    m_pUpgrade1Sprite = 0;
+    delete m_pUpgrade2Sprite;
+    m_pUpgrade2Sprite = 0;
+    delete m_pUpgrade3Sprite;
+    m_pUpgrade3Sprite = 0;
 }
 
 bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2WorldId WorldID, std::vector<Projectile*>& projectileaddress, std::string TowerID)
@@ -55,8 +65,20 @@ bool Tower::Initialise(Renderer& renderer, Tile* startTile, float tileSize, b2Wo
     string SpritePath = "..\\assets\\towers\\" + data.Sprite + ".png";
     m_pSprite = renderer.CreateSprite(SpritePath.c_str());
 
+    // upgrade sprites
+    SpritePath = "..\\assets\\upgrades\\" + data.Upgrade1Name + ".png";
+    m_pUpgrade1Sprite = renderer.CreateSprite(SpritePath.c_str());
+    SpritePath = "..\\assets\\upgrades\\" + data.Upgrade2Name + ".png";
+    m_pUpgrade2Sprite = renderer.CreateSprite(SpritePath.c_str());
+    SpritePath = "..\\assets\\upgrades\\" + data.Upgrade3Name + ".png";
+    m_pUpgrade3Sprite = renderer.CreateSprite(SpritePath.c_str());
+
+    m_iUpgrade1Price = data.Upgrade1Price;
+    m_iUpgrade2Price = data.Upgrade2Price;
+    m_iUpgrade3Price = data.Upgrade3Price;
+    m_iTowerIDUpgrade = data.ID;
     //PROJECTILE STATS; AT SOME POINT WE WANT TO USE INI IMPORTATION TO GET THIS INSTEAD
-    canhome = false;
+    m_bExtraHoming = false;
     m_projectiles = &projectileaddress;
 
     m_x = startTile->Position.x * tileSize + tileSize * 0.5f;
@@ -162,7 +184,12 @@ void Tower::Process(float deltaTime)
     else if (!EnemyInRadius.empty()) {//if can fire and enemy is in radius 
         std::cout << "firing!\n";
         Projectile* newprojectile = new Projectile();//make new projectile
-        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), Target, projectileID, speed);//add to it
+        newprojectile->Initialise(*m_renderer, this, m_tileSize, b2Shape_GetWorld(shapeId), EnemyInRadius.at(0), projectileID, speed);//add to it
+        if (m_iExtraDamage > 0) newprojectile->ApplyExtraDamage(m_iExtraDamage);
+        if (m_iExtraPierce > 0) newprojectile->ApplyExtraPierce(m_iExtraPierce);
+        if (m_bExtraHoming) newprojectile->ApplyExtraHoming();
+        if (m_bExtraToxic) newprojectile->ApplyExtraPoison();
+        if (m_bExtraCold) newprojectile->ApplyExtraCold();
         m_projectiles->push_back(newprojectile);//
         firetimer = firedelay;
     }
@@ -196,4 +223,116 @@ void Tower::Sell()
 int Tower::GetSellValue() const
 {
     return Price / 2;
+}
+
+Sprite* Tower::GetUpgradeSprite(int index)
+{
+    switch (index)
+    {
+        case 1:
+            return m_pUpgrade1Sprite;
+        case 2:
+            return m_pUpgrade2Sprite;
+        case 3:
+            return m_pUpgrade3Sprite;
+    }
+    return m_pUpgrade1Sprite;
+}
+
+bool Tower::Upgrade(int index, int* gold)
+{
+    switch (index)
+    {
+    case 1:
+        if (*gold >= m_iUpgrade1Price)
+        {
+            m_bUpgrade1 = true;
+            *gold -= m_iUpgrade1Price;
+            Price += m_iUpgrade1Price;
+            ApplyUpgrade(3 * m_iTowerIDUpgrade + 1);
+            return true;
+        }
+        break;
+    case 2:
+        if (*gold >= m_iUpgrade2Price)
+        {
+            m_bUpgrade2 = true;
+            *gold -= m_iUpgrade2Price;
+            Price += m_iUpgrade2Price;
+            ApplyUpgrade(3 * m_iTowerIDUpgrade + 2);
+            return true;
+        }
+        break;
+    case 3:
+        if (*gold >= m_iUpgrade3Price)
+        {
+            m_bUpgrade3 = true;
+            *gold -= m_iUpgrade3Price;
+            Price += m_iUpgrade3Price;
+            ApplyUpgrade(3 * m_iTowerIDUpgrade + 3);
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+bool Tower::CanUpgrade(int index)
+{
+    switch (index)
+    {
+    case 1:
+        return !m_bUpgrade1;
+    case 2:
+        return !m_bUpgrade2;
+    case 3:
+        return !m_bUpgrade3;
+    }
+    return false;
+}
+
+void Tower::ApplyUpgrade(int upgrade)
+{
+    std::cout << "Apply Upgrade being ran\n";
+    switch (upgrade)
+    {
+        case Shooter_RapidFire:
+            firedelay -= 1.25f;
+            speed += 4.0f;
+            break;
+        case Shooter_LongRange:
+            range += 3.5f;
+            break;
+        case Shooter_LethalShot:
+            m_iExtraDamage += 2;
+            break;
+        case Iceman_SwiftThrow:
+            firedelay -= 1.0f;
+            break;
+        case Iceman_Coldness:
+            m_bExtraCold = true;
+            break;
+        case Iceman_ThickSnow:
+            m_iExtraPierce += 3;
+            break;
+        case Poisoner_LongReach:
+            range += 3.0f;
+            break;
+        case Poisoner_ExtraToxic:
+            m_bExtraToxic = true;
+            break;
+        case Poisoner_QuickFog:
+            firedelay -= 1.0f;
+            speed += 3.5f;
+            break;
+    }
+}
+
+bool Tower::IsTargetingLast()
+{
+    return AimForLast;
+}
+void Tower::SwapTargeting()
+{
+    AimForLast = !AimForLast;
 }

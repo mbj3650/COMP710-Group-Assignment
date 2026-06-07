@@ -3,6 +3,7 @@
 #include "GameData.h"
 #include "TowerData.h"
 #include "UISidepanel.h"
+#include "UIUpgradeButton.h"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -40,19 +41,25 @@ void UIShopManager::DestroyInstance()
 
 void UIShopManager::Initialise(Renderer& renderer)
 {
-	map<string, TowerData>::iterator iter;
-	for (iter = GameData::Get().Tower.begin(); iter != GameData::Get().Tower.end(); iter++)
+	const auto& towers = GameData::Get().Tower;
+	for (int i = 0; i < towers.size(); i++)
 	{
-		m_towerIDs.push_back(iter->first);
-
-		UIShopSlot* slot = new UIShopSlot();
-		slot->Initialise(
-			renderer,
-			m_shopSlots.size(),
-			"..\\assets\\towers\\" + iter->second.Sprite + ".png",
-			iter->second.Price
-		);
-		m_shopSlots.push_back(slot);
+		for (const auto& p : towers)
+		{
+			if (p.second.ID == i)
+			{
+				m_towerIDs.push_back(p.first);
+				UIShopSlot* slot = new UIShopSlot();
+				slot->Initialise(
+					renderer,
+					p.second.ID,
+					"..\\assets\\towers\\" + p.second.Sprite + ".png",
+					p.second.Price
+				);
+				m_shopSlots.push_back(slot);
+				break;
+			}
+		}
 	}
 	m_iSelectedSlot = -1;
 
@@ -60,12 +67,12 @@ void UIShopManager::Initialise(Renderer& renderer)
 	m_pSidePanel->Initialise(renderer);
 }
 
-void UIShopManager::Process(float deltaTime, InputSystem& input)
+void UIShopManager::Process(float deltaTime, InputSystem& input, int* gold)
 {
 	for (UIShopSlot* slot : m_shopSlots) {
 		slot->Process(deltaTime, input);
 	}
-	m_pSidePanel->Process(deltaTime, input);
+	m_pSidePanel->Process(deltaTime, input, gold);
 }
 void UIShopManager::Draw(Renderer& renderer)
 {

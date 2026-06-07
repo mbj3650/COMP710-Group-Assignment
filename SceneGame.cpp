@@ -298,6 +298,7 @@ void SceneGame::RefreshGoldText()
     if (m_pGoldText && m_pRenderer)
     {
         m_pGoldText->SetText(*m_pRenderer, "Gold: " + std::to_string(m_iGold));
+        m_iGoldPrev = m_iGold;
     }
 }
 
@@ -307,7 +308,7 @@ bool SceneGame::TrySpend(int cost)
 {
     if (cost < 0)       return false;
     if (m_iGold < cost) return false;
-
+    m_iGoldPrev = m_iGold;
     m_iGold -= cost;
     RefreshGoldText();
     return true;
@@ -317,6 +318,7 @@ bool SceneGame::TrySpend(int cost)
 void SceneGame::AddGold(int amount)
 {
     if (amount <= 0) return;
+    m_iGoldPrev = m_iGold;
     m_iGold += amount;
     RefreshGoldText();
 }
@@ -327,6 +329,7 @@ void SceneGame::AddGold(int amount)
 void SceneGame::AddGoldStrikeBonus()
 {
     if (!IsPayWindowOpen()) return;
+    m_iGoldPrev = m_iGold;
     m_iGold += GOLD_STRIKER_BONUS;
     RefreshGoldText();
 }
@@ -425,7 +428,12 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             }
         }
 
-        UIShopManager::GetInstance().Process(deltaTime, inputSystem);
+        if (m_iGold != m_iGoldPrev)
+        {
+            RefreshGoldText();
+        }
+
+        UIShopManager::GetInstance().Process(deltaTime, inputSystem, &m_iGold);
         m_fSpawnTimer += deltaTime;
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
