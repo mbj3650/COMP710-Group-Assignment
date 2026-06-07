@@ -535,8 +535,6 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             else
             {
                 Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\new_wave.wav");
-                RelicManager::Get().AddRandomRelic(m_towers);
-                UIShopManager::GetInstance().RefreshRelicSlots(*m_pRenderer);
             }
             m_iWave++;
             m_iEnemiesToSpawn = m_iWave * ENEMIES_PER_WAVE;
@@ -678,6 +676,11 @@ void SceneGame::DebugDraw()
     if (ImGui::Button("Hide UI"))
     {
         m_bHideUI = !m_bHideUI;
+    }
+    if (ImGui::Button("Add Random Relic"))
+    {
+        RelicManager::Get().AddRandomRelic(m_towers);
+        UIShopManager::GetInstance().RefreshRelicSlots(*m_pRenderer);
     }
 }
 
