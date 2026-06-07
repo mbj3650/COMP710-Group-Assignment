@@ -94,7 +94,9 @@ void GameData::LoadEnemyData()
 		Parser.GetValueAsInt(section + "|Damage"),
 		Parser.GetValueAsFloat(section + "|Speed"),
 		Parser.GetValueAsInt(section + "|BonusHealth"),
-		Parser.GetValueAsInt(section + "|ID")
+		Parser.GetValueAsInt(section + "|ID"),
+		Parser.GetValueAsInt(section + "|SpriteSizeX"),
+		Parser.GetValueAsInt(section + "|SpriteSizeY")
 		)});
 	}
 }

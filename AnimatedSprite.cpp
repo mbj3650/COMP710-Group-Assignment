@@ -9,6 +9,7 @@
 // Library includes:
 #include <cassert>
 #include "lib/imgui/imgui.h"
+#include <iostream>
 AnimatedSprite::AnimatedSprite()
 	: m_pVertexData(0)
 	, m_iFrameWidth(0)
@@ -52,10 +53,12 @@ AnimatedSprite::SetupFrames(int fixedFrameWidth, int fixedFrameHeight)
 {
 	m_iFrameWidth = fixedFrameWidth;
 	m_iFrameHeight = fixedFrameHeight;
+	
 	const int textureWidth = m_pTexture->GetWidth();
 	const int textureHeight = m_pTexture->GetHeight();
 	const int totalFramesWide = textureWidth / fixedFrameWidth;
 	const int totalFramesHigh = textureHeight / fixedFrameHeight;
+	std::cout << "Total frames wide: " << totalFramesWide << std::endl;
 	const int stride = 5;
 	const float uFrameWidth = 1.0f / totalFramesWide;
 	const float vFrameHeight = 1.0f / totalFramesHigh;

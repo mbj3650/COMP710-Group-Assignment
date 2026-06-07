@@ -24,6 +24,8 @@ class Tower;
 class DynamicText;
 class UIShopSlot;
 class UIShopManager;
+class SoundSystem;
+class AnimatedSprite;
 // Number of instruction text lines shown at game start
 const int NUM_INSTRUCTION_LINES = 9;
 
@@ -111,17 +113,12 @@ protected:
     bool         m_bShowInstructions;
     DynamicText* m_pInstructions[NUM_INSTRUCTION_LINES];
 
-    // --- FMOD ---
-    FMOD::Sound*   m_pMusicBG;
-    FMOD::Sound*   m_pSoundGameOver;
-    FMOD::Sound*   m_pSoundWaveStart;
-    FMOD::Channel* m_pMusicChannel;
-
     // --- Particles ---
     Sprite*   m_pParticleSprite;              // shared sprite (explosion.png)
     Particle  m_particlePool[PARTICLE_POOL_SIZE];
     void      SpawnBurst(float x, float y);   // activates a burst of particles
 
+    AnimatedSprite* testAni;
     // UI
     bool m_bHideUI;
     UIShopManager* m_pShopManager;

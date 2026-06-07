@@ -8,6 +8,7 @@
 #include "TowerData.h"
 #include "GameData.h"
 #include <iostream>
+#include "game.h"
 UIUpgradeButton::UIUpgradeButton()
 {
 	m_pButtonSprite = 0;
@@ -99,7 +100,7 @@ void UIUpgradeButton::Process(float deltaTime, InputSystem& input, int* gold)
 			if (IsElementHovered(input) && input.GetMouseButtonState(1) == BS_PRESSED)
 			{
 
-				
+				Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\pluck.wav");
 				switch (m_iUpgradeIndex)
 				{
 				case 1:

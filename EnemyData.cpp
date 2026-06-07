@@ -4,7 +4,7 @@
 EnemyData::EnemyData()
 {
 }
-EnemyData::EnemyData(std::string sprite, int price, int damage, float speed, int bonushealth, int id)
+EnemyData::EnemyData(std::string sprite, int price, int damage, float speed, int bonushealth, int id, int spritesizeX, int spritesizeY)
 {
 	Sprite = sprite;
 	Price = price;
@@ -12,6 +12,8 @@ EnemyData::EnemyData(std::string sprite, int price, int damage, float speed, int
 	Speed = speed;
 	BonusHealth = bonushealth;
 	ID = id;
+	SpriteSizeX = spritesizeX;
+	SpriteSizeY = spritesizeY;
 }
 EnemyData::~EnemyData()
 {

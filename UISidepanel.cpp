@@ -7,6 +7,7 @@
 #include "DynamicText.h"
 #include "inputsystem.h"
 #include <iostream>
+#include "game.h"
 UISidepanel::UISidepanel()
 {
 	m_pPanelSprite = 0;
@@ -62,16 +63,16 @@ void UISidepanel::Initialise(Renderer& renderer)
 	m_pTowerTitle = new DynamicText();
 	m_pTowerTitle->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 84, true);
 	m_pTowerTitle->SetText(renderer, " ");
-	m_pTowerTitle->SetPosition(x, y - 500);
+	m_pTowerTitle->SetPosition(x, y - 450);
 
 	m_pSellSprite = renderer.CreateSprite("..\\assets\\ui\\sellbutton.png");
 	m_pSellSprite->SetX(x - 125);
-	m_pSellSprite->SetY(y + 525);
+	m_pSellSprite->SetY(y + 470);
 
 	m_pSellText = new DynamicText();
 	m_pSellText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 36, true);
 	m_pSellText->SetText(renderer, "Sell");
-	m_pSellText->SetPosition(x - 125, y + 525);
+	m_pSellText->SetPosition(x - 125, y + 470);
 
 	m_pUpgrade1 = new UIUpgradeButton();
 	m_pUpgrade1->Initialise(renderer, x, y, -1);
@@ -84,11 +85,11 @@ void UISidepanel::Initialise(Renderer& renderer)
 
 	m_pTargetFirstSprite = renderer.CreateSprite("..\\assets\\ui\\target_first.png");
 	m_pTargetFirstSprite->SetX(x);
-	m_pTargetFirstSprite->SetY(y - 300);
+	m_pTargetFirstSprite->SetY(y - 250);
 
 	m_pTargetLastSprite = renderer.CreateSprite("..\\assets\\ui\\target_last.png");
 	m_pTargetLastSprite->SetX(x);
-	m_pTargetLastSprite->SetY(y - 300);
+	m_pTargetLastSprite->SetY(y - 250);
 
 	m_pSprites[0] = m_pTargetFirstSprite;
 	m_pSprites[1] = m_pTargetLastSprite;
@@ -97,7 +98,7 @@ void UISidepanel::Initialise(Renderer& renderer)
 	m_pTargetText = new DynamicText();
 	m_pTargetText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 32, true);
 	m_pTargetText->SetText(renderer, "Target: First");
-	m_pTargetText->SetPosition(x, y - 370);
+	m_pTargetText->SetPosition(x, y - 320);
 }
 
 void UISidepanel::Process(float deltaTime, InputSystem& input, int* gold)
@@ -105,15 +106,11 @@ void UISidepanel::Process(float deltaTime, InputSystem& input, int* gold)
 	// if we have a tower in sidepanel, and mouse clicks on sell button
 	if (m_pSidepanelTower)
 	{
-		if (IsSpriteHovered(m_pSellSprite, input) && input.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED)
-		{
-			m_pSidepanelTower->Sell();
-			m_pSidepanelTower = 0;
-		}
-		else if (IsSpriteHovered(m_pTargetFirstSprite, input) && input.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED)
+		if (IsSpriteHovered(m_pTargetFirstSprite, input) && input.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED)
 		{
 			std::cout << "toggled targeting\n";
 			m_pSidepanelTower->SwapTargeting();
+			Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\select.wav");
 		}
 
 		if (m_pSidepanelTower->IsTargetingLast())
@@ -123,6 +120,14 @@ void UISidepanel::Process(float deltaTime, InputSystem& input, int* gold)
 		else
 		{
 			m_iSpriteIndex = 0;
+		}
+
+		// Selling tower has to be done last
+		if (IsSpriteHovered(m_pSellSprite, input) && input.GetMouseButtonState(SDL_BUTTON_LEFT) == BS_PRESSED)
+		{
+			m_pSidepanelTower->Sell();
+			m_pSidepanelTower = 0;
+			Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\bump.wav");
 		}
 			
 	}
@@ -185,6 +190,7 @@ void UISidepanel::SetTower(Renderer& renderer, Tower* tower)
 		m_pUpgrade1->SetTower(renderer, tower);
 		m_pUpgrade2->SetTower(renderer, tower);
 		m_pUpgrade3->SetTower(renderer, tower);
+		Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\select.wav");
 	}
 	else
 	{

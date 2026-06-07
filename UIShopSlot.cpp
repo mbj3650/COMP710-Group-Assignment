@@ -5,6 +5,7 @@
 #include "DynamicText.h"
 #include "inputsystem.h"
 #include <iostream>
+#include "game.h"
 UIShopSlot::UIShopSlot()
 {
 	m_pSlotSprite = 0;
@@ -81,6 +82,7 @@ void UIShopSlot::Process(float deltaTime, InputSystem& input)
 			if (input.GetMouseButtonState(1) == BS_PRESSED)
 			{
 				UIShopManager::GetInstance().UpdateSelection(m_iSlot);
+				Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\select.wav");
 			}
 		}
 		else

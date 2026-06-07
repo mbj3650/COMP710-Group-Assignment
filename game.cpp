@@ -44,14 +44,13 @@ Game::Game() : m_pRenderer(0), m_bLooping(true)
 
 Game::~Game()
 {
-	system->release();
-	std::cout << "SYSTEM DESTROYED!\n";
 	for (int i = 0; i < (int)m_scenes.size(); i++) {
 		delete m_scenes.at(i);
 		m_scenes.at(i) = 0;
 	}
 	std::cout << "SCENES DESTROYED!\n";
-	m_pSounds.clear();
+	delete m_pSoundSystem;
+	m_pSoundSystem = 0;
 	delete m_pInputSystem;
 	m_pInputSystem = 0;
 	std::cout << "INPUT SYSTEM DESTROYED!\n";
@@ -69,19 +68,8 @@ void Game::Quit()
 
 bool Game::Initialise()
 {
-	result = FMOD::System_Create(&system);
-	if (result != FMOD_OK)
-	{
-		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
-		exit(-1);
-	}
-
-	result = system->init(512, FMOD_INIT_NORMAL, 0);
-	if (result != FMOD_OK)
-	{
-		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
-		exit(-1);
-	}
+	m_pSoundSystem = new SoundSystem();
+	m_pSoundSystem->Init();
 
 	int bbWidth  = 1280;
 	int bbHeight = 720;
@@ -129,7 +117,7 @@ bool Game::DoGameLoop()
 {
 	const float stepSize = 1.0f / 60.0f;
 	m_pInputSystem->ProcessInput();
-
+	m_pSoundSystem->Process();
 	if (m_bLooping)
 	{
 		Uint64 current = SDL_GetPerformanceCounter();
@@ -233,4 +221,9 @@ void Game::ToggleDebugWindow()
 {
 	m_bShowDebugWindow = !m_bShowDebugWindow;
 	m_pInputSystem->ShowMouseCursor(m_bShowDebugWindow);
+}
+
+SoundSystem* Game::GetSoundSystem()
+{
+	return m_pSoundSystem;
 }

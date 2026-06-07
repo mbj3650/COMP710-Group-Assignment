@@ -2,6 +2,7 @@
 // Library includes:
 #include <vector>
 #include "inputsystem.h"
+#include "soundsystem.h"
 #include "fmod.h"
 
 #include "fmod_common.h"
@@ -27,10 +28,7 @@ public:
 	void DebugDraw();
 	void ToggleDebugWindow();
 	void Quit();
-	void createSound(char path[]);
-
-	// Returns the FMOD system so scenes can load and play their own sounds
-	FMOD::System* GetSoundSystem() { return system; }
+	SoundSystem* GetSoundSystem();
 
 protected:
 	void Process(float deltaTime);
@@ -56,9 +54,7 @@ protected:
 	float m_fElapsedSeconds;
 	int m_iFrameCount;
 	int m_iFPS;
-	FMOD_RESULT result;
-	std::vector < FMOD::Sound*> m_pSounds;
-	FMOD::System* system = NULL;
+	SoundSystem* m_pSoundSystem;
 
 #ifdef USE_LAG
 	float m_fLag;

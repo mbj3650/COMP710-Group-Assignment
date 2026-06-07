@@ -8,7 +8,6 @@
 
 #include "SceneGame.h"
 #include "renderer.h"
-#include "sprite.h"
 #include "AnimatedSprite.h"
 #include "Pathmaker.h"
 #include "Tile.h"
@@ -30,6 +29,7 @@
 #include "GameData.h"
 #include "TowerData.h"
 #include "ProjectileData.h"
+#include "soundsystem.h"
 #include <iostream>
 #include <string>
 #include <box2d.h>
@@ -76,11 +76,8 @@ SceneGame::SceneGame()
     m_pGameOverSprite  = 0;
     m_pRestartText     = 0;
     m_bShowInstructions= true;
-    m_pMusicBG         = 0;
-    m_pSoundGameOver   = 0;
-    m_pSoundWaveStart  = 0;
-    m_pMusicChannel    = 0;
     m_pParticleSprite  = 0;
+    testAni = 0;
     for (int i = 0; i < NUM_INSTRUCTION_LINES; i++)
         m_pInstructions[i] = 0;
 }
@@ -128,11 +125,7 @@ SceneGame::~SceneGame()
         delete m_pInstructions[i];
         m_pInstructions[i] = 0;
     }
-
-    if (m_pMusicBG)        { m_pMusicBG->release();        m_pMusicBG        = 0; }
-    if (m_pSoundGameOver)  { m_pSoundGameOver->release();  m_pSoundGameOver  = 0; }
-    if (m_pSoundWaveStart) { m_pSoundWaveStart->release(); m_pSoundWaveStart = 0; }
-
+    delete testAni; testAni = 0;
     UIShopManager::DestroyInstance();
     b2DestroyWorld(WorldPointer);
     delete World;
@@ -223,16 +216,27 @@ bool SceneGame::Initialise(Renderer& renderer)
     // Tower and UI
     GameData::Get().Initialise();
 	UIShopManager().GetInstance().Initialise(renderer);
-    // FMOD
-    FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
-    if (fmod)
+    // adding sound effects
+    SoundSystem* soundSystem = Game::GetInstance().GetSoundSystem();
+    if (soundSystem)
     {
-        fmod->createSound(MUSIC_BG_PATH, FMOD_LOOP_NORMAL | FMOD_CREATESTREAM, 0, &m_pMusicBG);
-        fmod->createSound(SOUND_GAMEOVER_PATH, FMOD_DEFAULT, 0, &m_pSoundGameOver);
-        fmod->createSound(SOUND_WAVESTART_PATH, FMOD_DEFAULT, 0, &m_pSoundWaveStart);
-        if (m_pMusicBG) fmod->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
+        soundSystem->CreateSound("..\\assets\\sounds\\hit.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\select.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\bump.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\pluck.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\enemy_damage_player.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\game_over.wav");
+        soundSystem->CreateSound("..\\assets\\sounds\\new_wave.wav");
     }
 
+    testAni = renderer.CreateAnimatedSprite("..\\assets\\enemies\\Slime.png");
+    testAni->SetupFrames(50, 50);
+    testAni->SetLooping(true);
+    testAni->SetFrameDuration(0.5f);
+    testAni->Animate();
+    testAni->SetX(500);
+    testAni->SetY(500);
+    testAni->SetScale(2.0f);
     return true;
 }
 
@@ -336,6 +340,7 @@ void SceneGame::AddGoldStrikeBonus()
 
 void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
 {
+    testAni->Process(deltaTime);
     // --- Instructions overlay ---
     if (m_bShowInstructions)
     {
@@ -408,6 +413,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
                     m_towers.push_back(newTower);
 					UIShopManager::GetInstance().UpdateSelection(-1); // deselect
                     UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, newTower);
+                    Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\bump.wav");
                 }
                 else
                 {
@@ -433,7 +439,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             RefreshGoldText();
         }
 
-        UIShopManager::GetInstance().Process(deltaTime, inputSystem, &m_iGold);
+        
         m_fSpawnTimer += deltaTime;
         b2World_Step(WorldPointer, deltaTime, ScenesubStepCount);
 
@@ -444,7 +450,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         {
             m_fSpawnTimer = 0.0f;
             Enemy* e = new Enemy();
-            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Basic");
+            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Slime");
             m_enemies.push_back(e);
             m_iEnemiesToSpawn--;
 
@@ -460,6 +466,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
                 m_towers[i]->GetCurrentTile()->hastower = false;
                 UIShopManager::GetInstance().SetSidepanelTower(*m_pRenderer, 0); // remove sidepanel tower
                 AddGold(m_towers[i]->GetSellValue()); // refund half the tower's price
+                Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\bump.wav");
                 delete m_towers[i];
                 m_towers.erase(m_towers.begin() + i);
 				continue;
@@ -467,6 +474,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             m_towers[i]->Process(deltaTime);
         }
 
+        UIShopManager::GetInstance().Process(deltaTime, inputSystem, &m_iGold);
 
         for (int i = (int)m_projectiles.size() - 1; i >= 0; i--)//tower process
         {
@@ -511,16 +519,14 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
                 m_iLives-= m_enemies[i]->GetDamage();
                 delete m_enemies[i];
                 m_enemies.erase(m_enemies.begin() + i);
-                
+                Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\enemy_damage_player.wav");
                 m_pLivesText->SetText(*m_pRenderer, "Lives: " + std::to_string(m_iLives));
 
                 if (m_iLives <= 0)
                 {
+                    Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\game_over.wav");
                     m_bGameOver = true;
                     std::cout << "GAME OVER\n";
-                    if (m_pMusicChannel) { m_pMusicChannel->stop(); m_pMusicChannel = 0; }
-                    FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
-                    if (fmod && m_pSoundGameOver) fmod->playSound(m_pSoundGameOver, 0, false, 0);
                     return;
                 }
             }
@@ -535,11 +541,9 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
             std::cout << "Wave " << m_iWave << " starting!\n";
 
             // Fresh pay window for the new wave.
+            Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\new_wave.wav");
             m_fWaveTimer        = 0.0f;
             m_bWaveTimerStarted = false;
-
-            FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
-            if (fmod && m_pSoundWaveStart) fmod->playSound(m_pSoundWaveStart, 0, false, 0);
         }
     }
 }
@@ -555,7 +559,7 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 
     if (list->GetTile({ pathmaker->pos.x + xoffset, pathmaker->pos.y + yoffset })->isPath)
         return false;
-
+    Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\bump.wav");
     Tile* cur  = list->GetTile(pathmaker->pos);
     pathmaker->pos.x += xoffset;
     pathmaker->pos.y += yoffset;
@@ -564,7 +568,6 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
     next->setPrevious(cur);
     next->setPath();
     list->path.push_back(next);
-
     if (list->isEnd(pathmaker->pos))
     {
         moving = false;
@@ -584,7 +587,7 @@ bool SceneGame::MovePosition(int xoffset, int yoffset)
 
 void SceneGame::Draw(Renderer& renderer)
 {
-
+    testAni->Draw(renderer);
     // Instructions overlay
     if (m_bShowInstructions)
     {
@@ -657,9 +660,6 @@ void SceneGame::DebugDraw()
     if (ImGui::Button("Force Game Over"))
     {
         m_iLives = 0; m_bGameOver = true;
-        if (m_pMusicChannel) { m_pMusicChannel->stop(); m_pMusicChannel = 0; }
-        FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
-        if (fmod && m_pSoundGameOver) fmod->playSound(m_pSoundGameOver, 0, false, 0);
     }
     if (ImGui::Button("Skip Instructions"))
     {
@@ -721,9 +721,6 @@ void SceneGame::RestartGame(Renderer& renderer)
 
     // Kill all particles
     for (int i = 0; i < PARTICLE_POOL_SIZE; i++) m_particlePool[i].m_bAlive = false;
-
-    FMOD::System* fmod = Game::GetInstance().GetSoundSystem();
-    if (fmod && m_pMusicBG) fmod->playSound(m_pMusicBG, 0, false, &m_pMusicChannel);
 
     std::cout << "Game restarted.\n";
 }

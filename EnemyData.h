@@ -5,7 +5,7 @@ class EnemyData
 {
 public:
 	EnemyData();
-	EnemyData(std::string sprite, int price, int damage, float speed, int bonushealth, int id);
+	EnemyData(std::string sprite, int price, int damage, float speed, int bonushealth, int id, int spritesizeX, int spritesizeY);
 	~EnemyData();
 
 	std::string Sprite;
@@ -14,6 +14,8 @@ public:
 	float Speed;
 	int BonusHealth;
 	int ID;
+	int SpriteSizeX;
+	int SpriteSizeY;
 };
 
 #endif // ENEMYDATA_H

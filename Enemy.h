@@ -11,7 +11,7 @@
 #include <box2d.h>
 #include <string>
 class Renderer;
-class Sprite;
+class AnimatedSprite;
 class Tile;
 struct b2WorldId;
 struct b2ShapeId;
@@ -53,7 +53,7 @@ private:
     Enemy(const Enemy&);
     Enemy& operator=(const Enemy&);
 
-    Sprite* m_pSprite;
+    AnimatedSprite* m_pAniSprite;
     Tile*   m_pCurrentTile;
 
     b2BodyId  ID;

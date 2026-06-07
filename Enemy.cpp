@@ -7,7 +7,7 @@
 
 #include "Enemy.h"
 #include "Tile.h"
-#include "sprite.h"
+#include "animatedsprite.h"
 #include "renderer.h"
 #include <cmath>
 #include <cassert>
@@ -15,10 +15,11 @@
 #include <box2d.h>
 #include "EnemyData.h"
 #include "GameData.h"
+#include "game.h"
 
 Enemy::Enemy()
 {
-    m_pSprite      = 0;
+    m_pAniSprite      = 0;
     m_pCurrentTile = 0;
     m_x            = 0;
     m_y            = 0;
@@ -38,8 +39,8 @@ Enemy::~Enemy()
     {
         b2DestroyBody(ID);
     }
-    delete m_pSprite;
-    m_pSprite = 0;
+    delete m_pAniSprite;
+    m_pAniSprite = 0;
 }
 
 bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
@@ -77,24 +78,28 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
         m_speed = m_speed * 0.5f;//boss moves slower than normal enemies
     }
 
-    std::string SpritePath = "..\\assets\\projectiles\\" + data.Sprite + ".png";
-    m_pSprite = renderer.CreateSprite(SpritePath.c_str());
-
+    std::string SpritePath = "..\\assets\\enemies\\" + data.Sprite + ".png";
+    m_pAniSprite = renderer.CreateAnimatedSprite(SpritePath.c_str());
+    m_pAniSprite->SetupFrames(data.SpriteSizeX, data.SpriteSizeY);
+    m_pAniSprite->SetLooping(true);
+    m_pAniSprite->SetFrameDuration(0.5f);
+    m_pAniSprite->Animate();
+    std::cout << m_pAniSprite->GetWidth() << " blehhh \n";
     // bosses are drawn bigger so the player can tell them apart
-    float scalesize = 0.65f;
+    float scalesize = 0.9f;
     if (m_bIsBoss)
     {
         scalesize = 1.2f;
     }
-    float scale = (tileSize * scalesize) / m_pSprite->GetWidth();
-    m_pSprite->SetScale(scale);
+    float scale = (tileSize * scalesize) / m_pAniSprite->GetWidth();
+    m_pAniSprite->SetScale(scale);
 
     // give the boss a green tint so it looks like a blob and stands out
     if (m_bIsBoss)
     {
-        m_pSprite->SetRedTint(0.3f);
-        m_pSprite->SetGreenTint(1.0f);
-        m_pSprite->SetBlueTint(0.3f);
+        m_pAniSprite->SetRedTint(0.3f);
+        m_pAniSprite->SetGreenTint(1.0f);
+        m_pAniSprite->SetBlueTint(0.3f);
     }
 
     // Box2D body setup
@@ -112,8 +117,8 @@ bool Enemy::Initialise(Renderer& renderer, Tile* startTile, float tileSize,
     shapeDef.filter.maskBits  = 0x0002 | 0x0001 | 0x0003;
     shapeId = b2CreatePolygonShape(ID, &shapeDef, &box);
     b2Shape_SetUserData(shapeId, this);
-    m_pSprite->SetX(b2Body_GetPosition(ID).x);
-    m_pSprite->SetY(b2Body_GetPosition(ID).y);
+    m_pAniSprite->SetX(b2Body_GetPosition(ID).x);
+    m_pAniSprite->SetY(b2Body_GetPosition(ID).y);
 
     return true;
 }
@@ -123,6 +128,7 @@ void Enemy::TakeDamage(int amount)
 {
     m_iHP -= amount;
     if (m_iHP < 0) m_iHP = 0;
+    Game::GetInstance().GetSoundSystem()->PlaySound("..\\assets\\sounds\\hit.wav");
 }
 
 
@@ -236,27 +242,27 @@ void Enemy::Process(float deltaTime)
         }    
         b2Body_SetLinearVelocity(ID, vel);
     }
-
-    m_pSprite->SetX(b2Body_GetPosition(ID).x);
-    m_pSprite->SetY(b2Body_GetPosition(ID).y);
+    m_pAniSprite->Process(deltaTime);
+    m_pAniSprite->SetX(b2Body_GetPosition(ID).x);
+    m_pAniSprite->SetY(b2Body_GetPosition(ID).y);
 }
 
 void Enemy::TurnRed() {
-    m_pSprite->SetBlueTint(0.0f);
-    m_pSprite->SetGreenTint(0.0f);
-    m_pSprite->SetRedTint(1.0f);
+    m_pAniSprite->SetBlueTint(0.0f);
+    m_pAniSprite->SetGreenTint(0.0f);
+    m_pAniSprite->SetRedTint(1.0f);
 }
 
 void Enemy::TurnBlue() {
-    m_pSprite->SetBlueTint(1.0f);
-    m_pSprite->SetGreenTint(0.0f);
-    m_pSprite->SetRedTint(0.0f);
+    m_pAniSprite->SetBlueTint(1.0f);
+    m_pAniSprite->SetGreenTint(0.0f);
+    m_pAniSprite->SetRedTint(0.0f);
 }
 
 void Enemy::Draw(Renderer& renderer)
 {
     if (!m_bReachedEnd && !IsDead())
     {
-        m_pSprite->Draw(renderer);
+        m_pAniSprite->Draw(renderer);
     }
 }
