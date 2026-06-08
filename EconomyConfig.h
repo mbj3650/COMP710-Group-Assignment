@@ -12,7 +12,7 @@
 // -------------------------------------------------------
 // Global constants
 // -------------------------------------------------------
-const int   START_GOLD       = 300;    // enough for 2 basic towers, or 1 mid + change
+const int   START_GOLD       = 200;    // enough for 2 basic towers, or 1 mid + change
 const int   KILL_BOUNTY_BASE = 6;      // gold for one normal kill on wave 1
 const float BOUNTY_DECAY     = 0.90f;  // bounty is multiplied by this each wave
 const int   BOUNTY_FLOOR     = 3;      // bounty never drops below this (bumped from 2 -- late waves felt too dry)
