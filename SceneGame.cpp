@@ -165,6 +165,7 @@ bool SceneGame::Initialise(Renderer& renderer)
         m_pGameOverSprite->SetScale(sx < sy ? sx : sy);
         m_pGameOverSprite->SetX(W / 2);
         m_pGameOverSprite->SetY(H / 2);
+        m_pGameOverSprite->SetAlpha(0.5f);
     }
 
     m_pCursor = renderer.CreateSprite("..\\assets\\cursor.png"); // set sprite
@@ -602,7 +603,11 @@ void SceneGame::Draw(Renderer& renderer)
     // Game over screen
     if (m_bGameOver)
     {
-        if (m_pGameOverSprite) m_pGameOverSprite->Draw(renderer);
+        if (m_pGameOverSprite)
+        {
+            m_pGameOverSprite->SetAlpha(0.5f);
+            m_pGameOverSprite->Draw(renderer);
+        }
         if (m_pRestartText)    m_pRestartText->Draw(renderer);
         return;
     }
