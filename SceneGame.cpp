@@ -53,8 +53,9 @@ const char* INSTRUCTION_LINES[NUM_INSTRUCTION_LINES] = {
     "A / D    Move cursor left / right",
     "B        Undo last step",
     "ESC      Quit",
-    "SPACE    Start game",
+    "SPACE    Start game/2x Speed",
     "H        Hide UI"
+    "P        Pause game"
 };
 
 SceneGame::SceneGame()
@@ -359,6 +360,18 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         return;
     }
 
+    //PROCESS CURSOR!
+    m_pCursor->SetX(inputSystem.GetMousePosition().x + m_pCursor->GetWidth() / 2);
+    m_pCursor->SetY(inputSystem.GetMousePosition().y + m_pCursor->GetHeight() / 2);
+
+    if (inputSystem.GetKeyState(SDL_SCANCODE_P) == BS_PRESSED)
+    {
+        isPaused = !isPaused;
+    }
+    if (isPaused) {
+        return;
+    }
+
     // --- Particles ---
     for (int i = 0; i < PARTICLE_POOL_SIZE; i++)
     {
@@ -369,9 +382,7 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
     // --- Normal game ---
     list->Process(deltaTime, inputSystem);
 
-    //PROCESS CURSOR!
-    m_pCursor->SetX(inputSystem.GetMousePosition().x + m_pCursor->GetWidth() / 2);
-    m_pCursor->SetY(inputSystem.GetMousePosition().y+ m_pCursor->GetHeight()/2);
+   
 
     if (moving)
     {

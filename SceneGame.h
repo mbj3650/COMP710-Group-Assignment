@@ -113,6 +113,9 @@ protected:
     bool         m_bShowInstructions;
     DynamicText* m_pInstructions[NUM_INSTRUCTION_LINES];
 
+    // --- Pause Functionality ---
+    bool isPaused;
+
     // --- Particles ---
     Sprite*   m_pParticleSprite;              // shared sprite (explosion.png)
     Particle  m_particlePool[PARTICLE_POOL_SIZE];
