@@ -166,6 +166,7 @@ bool SceneGame::Initialise(Renderer& renderer)
         m_pGameOverSprite->SetScale(sx < sy ? sx : sy);
         m_pGameOverSprite->SetX(W / 2);
         m_pGameOverSprite->SetY(H / 2);
+        m_pGameOverSprite->SetAlpha(0.5f);
     }
 
     m_pCursor = renderer.CreateSprite("..\\assets\\cursor.png"); // set sprite
@@ -455,7 +456,28 @@ void SceneGame::Process(float deltaTime, InputSystem& inputSystem)
         {
             m_fSpawnTimer = 0.0f;
             Enemy* e = new Enemy();
-            e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Slime");
+            int i = GetRandom(1, 100);
+            if (i <= 88)
+            {
+                e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Slime");
+            }
+            else if (i <= 91)
+            {
+                e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Wizard");
+            }
+            else if (i <= 94)
+            {
+                e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Werewolf");
+            }
+            else if (i <= 97)
+            {
+                e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Skeleton");
+            }
+            else if (i <= 100)
+            {
+                e->Initialise(*m_pRenderer, list->GetStart(), m_fTileSize, WorldPointer, m_iWave, "Goblin");
+            }
+            
             m_enemies.push_back(e);
             m_iEnemiesToSpawn--;
 
@@ -625,7 +647,11 @@ void SceneGame::Draw(Renderer& renderer)
     // Game over screen
     if (m_bGameOver)
     {
-        if (m_pGameOverSprite) m_pGameOverSprite->Draw(renderer);
+        if (m_pGameOverSprite)
+        {
+            m_pGameOverSprite->SetAlpha(0.5f);
+            m_pGameOverSprite->Draw(renderer);
+        }
         if (m_pRestartText)    m_pRestartText->Draw(renderer);
         return;
     }
