@@ -53,6 +53,7 @@ void UIShopSlot::Initialise(Renderer& renderer, int index, std::string towerPath
 
 	m_pIconSprite->SetX(x);
 	m_pIconSprite->SetY(y);
+	m_pIconSprite->SetScale(64 / m_pIconSprite->GetWidth());
 
 	m_pPriceText = new DynamicText();
 	m_pPriceText->Initialise(renderer, "C:\\Windows\\Fonts\\arial.ttf", 18, false);

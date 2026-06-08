@@ -56,6 +56,7 @@ Tilelist::Initialise(Renderer& renderer, int rows, int columns)
 	}
 	GetTile(Startpos)->setStart();//set start
 	GetTile(Startpos)->isPath = true;
+	GetTile(Startpos)->UpdateDraw();
 	GetTile(Endpos)->setEnd();//set end
 
 	path.push_back(GetStart());//add as start node to list
@@ -104,10 +105,17 @@ Tilelist::Draw(Renderer& renderer)
 	{
 		tiles.at(k)->Draw(renderer);
 	}
-	for (int k = 0; k < path.size(); ++k)
-	{
-		path.at(k)->Draw(renderer);
+	if (!path.empty()) {
+		for (int k = 0; k < path.size(); ++k)
+		{
+			path.at(k)->DrawPaths(renderer);
+		}
+		for (int k = 0; k < path.size(); ++k)
+		{
+			path.at(k)->Draw(renderer);
+		}
 	}
+	
 	Startflag->Draw(renderer);
 	Endflag->Draw(renderer);
 

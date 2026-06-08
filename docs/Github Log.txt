@@ -1,0 +1,108 @@
+bbcf344911572dbe19ad963be73663cb0c828a2c (HEAD -> master, origin/master, origin/HEAD) Adjusted hit and starting player cash
+449e566b472920ba34ec9417697c032d29223bb8 Merge branch 'master' of https://github.com/mbj3650/COMP710-Group-Assignment
+67aed3f2a1ad5e370eda857cff398b6cd364cfb3 Added pause functionality
+1ce2094f4629f81cda9db5bd3e8974e5394f83de replaced placeholder upgrade art
+f8646b919b668ae5dd15da39c1ba233c0db76329 Added Obstacles, updated sprites
+72ec263f91b19a836c8731b49fd104490105f061 upgrade price adjustments
+1bf7b7c001cc9b72180f93703962cd8bf16469e7 removed debug relic from each round
+6914a4969898d0166b1ffd91d2e4113bcfd79983 Merge branch 'master' of https://github.com/mbj3650/COMP710-Group-Assignment
+2caede6219db71b2001bdd3cd2e02d36d987db4f relic system!!!
+ee43d75125fcddc149a052ec32394d68286d1ff7 Fixed enemies colliding with eachother
+34f7c11e3d202085b83f6bb01772ee30b8c5a33e fixed skeleton spritesheet
+5a7490f516d0c3cfe50e0748d7eb5eaf698e1e45 Right click to deselect towers, fixed targeting
+0d0be672484659ff44263bca70357373b61295fc removed test animated sprite
+2987d1e8599a48b359e18fce01e034c8b5f8ae80 animated enemies, and soundsystem class
+98dfa7db756d6e244505db00f4ceb6408dde327c fixed crash when selling towers
+217275eec98806a3dab5ab141585cc0d1052552b Merge pull request #14 from mbj3650/UI-expanded
+f7b747b62430fdfca8e83f54524141e626b7159d (origin/UI-expanded) Merge fixes
+d1e5550d84522a54e4c6d2f5c0ec327b4cb5364a Merge branch 'master' of https://github:...skipping...
+bbcf344911572dbe19ad963be73663cb0c828a2c (HEAD -> master, origin/master, origin/HEAD) Adjusted hit and starting player cash
+449e566b472920ba34ec9417697c032d29223bb8 Merge branch 'master' of https://github.com/mbj3650/COMP710-Group-Assignment
+67aed3f2a1ad5e370eda857cff398b6cd364cfb3 Added pause functionality
+1ce2094f4629f81cda9db5bd3e8974e5394f83de replaced placeholder upgrade art
+f8646b919b668ae5dd15da39c1ba233c0db76329 Added Obstacles, updated sprites
+72ec263f91b19a836c8731b49fd104490105f061 upgrade price adjustments
+1bf7b7c001cc9b72180f93703962cd8bf16469e7 removed debug relic from each round
+6914a4969898d0166b1ffd91d2e4113bcfd79983 Merge branch 'master' of https://github.com/mbj3650/COMP710-Group-Assignment
+2caede6219db71b2001bdd3cd2e02d36d987db4f relic system!!!
+ee43d75125fcddc149a052ec32394d68286d1ff7 Fixed enemies colliding with eachother
+34f7c11e3d202085b83f6bb01772ee30b8c5a33e fixed skeleton spritesheet
+5a7490f516d0c3cfe50e0748d7eb5eaf698e1e45 Right click to deselect towers, fixed targeting
+0d0be672484659ff44263bca70357373b61295fc removed test animated sprite
+2987d1e8599a48b359e18fce01e034c8b5f8ae80 animated enemies, and soundsystem class
+98dfa7db756d6e244505db00f4ceb6408dde327c fixed crash when selling towers
+217275eec98806a3dab5ab141585cc0d1052552b Merge pull request #14 from mbj3650/UI-expanded
+f7b747b62430fdfca8e83f54524141e626b7159d (origin/UI-expanded) Merge fixes
+d1e5550d84522a54e4c6d2f5c0ec327b4cb5364a Merge branch 'master' of https://github.com/mbj3650/COMP710-Group-Assignment into UI-expanded
+decb699af9a760761d00c56c828d7d0341dfbbf4 upgrades!!!
+0975d25ae2b6f2691011ac2df49ad7bfb9e529ea Added ability to make game double speed by holding down spacebar
+a7b43e6b341f277cf0c48faa5ae0ca5a23a87f73 add balance/content notes
+ac0feaa0837fc982e65e4060dc91e0ff62e59780 rename towers to match design doc names
+0b3a33747d791efde2676f0bdc372b0ca316fcec bump bounty floor, add v0.2 economy tunables
+fb0b1a9a48dc18ca6c766c941d8fb39d9ccf42f2  add spear and pulse projectile data
+b8eee901987b51c2a969540bdfe0033279b50e97 add enemy type definitions
+cf136b86cb9740b15f3b3e9a03683a1bf8bbdfc0 Also added ability to aim for first and last, forgot to turn off toggle for it
+b13ee84598b74933f615c32cd11ad4378d34119a Updated prices
+50515204f8514d819bb0f8ef37843c066acb8607 Added cursor, added new sprites for paths and flag and fixed missing texture not working
+148daf68e3c06c79246b0fbd2902efaecebe28bd Added cursor, added new sprites for paths and flag and fixed missing texture not working
+18486bd1dc7c5d81ddf688f292606c1cbf06ef82 Merge pull request #13 from mbj3650/New-Towers
+9a5899a0cad96235fedc26e510390af6ec945292 (origin/New-Towers, New-Towers) Also set firetimer to 0 so tower doesnt have to wait for its first shot in initialization
+63ee181dc84dac483909ff334af90146e79649e6 Added Boomerang tower and fireball tower and added fadeout for sprite lifetime
+72f91b6851282c1eb4236749b746fa5820f3e207 tower upgrades (half finished)
+b945ad68a4f7fa64fb72050c0b41c6ba85d9162d Accidentally set enemy to 2x speed
+1bdb9ba30cb05a6179f075b1e613b6495aea4d2e Quick homing fix
+b3227bf5400e3984bec13d34e594201220130b5b add boss enemy with hp regen
+8d9a8d3ae74472307166931cc7e1cca170ca3db2 sound effects and a bunch of icons from an asset pack
+7cb897598d51b50b28375b6f448531cbde7e5d20 Merge branch 'HomingFix'
+f8097b99c9bfd7bb926f9adb6dc367db22e02bb4 Merge pull request #11 from mbj3650/UI
+6aaf7478f063334b632e99d5611cea18eec6fd4a (origin/UI) fixes!
+16209ee7e269dc478a34de13d4e077acc6b4af53 basic UI complete
+5af8c8920e38520b05943ad0c5cc36bcdfd65293 (origin/HomingFix, HomingFix) Homing Logic v3
+3151d819ddd6436c35074692cac88557da0054f8 Homing Logic change v2
+d94310f9b6b43af49e382dba79c0160f7437a369 Homing projectiles will look for another target in its owners range and turn towards it if the original enemy dies mid flight Disabled debug color changes and console messages
+f28b94b9bb99d115716d03a8d6d0e73d03f739d3 Converted Enemy to INI format
+66822b0a9eba4a1b076701dbaa7b484dd192e986 Merge pull request #10 from mbj3650/Projectile
+17e052db7b3def7b6a9a75f199459e2cb89b4df3 (origin/Projectile, Projectile) Merge branch 'master' into Projectile
+65f9e80a1a2ebb3f1a95e811b566c2d65dd1c334 Added new towers and sprites
+d3e79fac1816570007af8e2709530c4d2eaa54dc Fixed texture corruption, added tower+projectile sprite turning
+37d6e655690eb72a50f165a0f7e7b634ab839b3f Added second projectile to test multiple projectile formatting
+08c5199dc2be633fcfa2c8c83b19b65ef3ac097b Added INIParser
+5199d254f2212237b926d744b0a9ac083d4a4350 Fixed damage not applying to projectiles
+a2c3a29c102ceb2c31331a75cda4d0630e3b395a Set up basic projectile class
+577f3dc82ab6b5527e82de05bacb1a39649f147f Add files via upload
+cddb44a267cbc165e66cc7521c9be09d5fa394a7 Bugfixes
+8c2723aff7141bd1a2618a8003f40b6ec4b07905 Merge pull request #9 from mbj3650/Tower-Addition
+ebc38b914b1aebbccc8eaedf185dde018bda083f (origin/Tower-Addition, Tower-Addition) Merge pull request #8 from mbj3650/master
+c0199a329cab22f069e38baba65c7a45c2b00110 Add files via upload
+ee08316377a3a821f9635dc20448101fed783642 Add files via upload
+f427c01c741861391645bad154b662b910dc999e Added Tower + new sprites
+cdfa685d1c3dc8b6f3941004b19028f60889380e Add files via upload
+85b690e3d46b14c2dc78a6d6a3ea8fc42343a7fd Add files via upload
+5c93549c8a6fd9c6026cde191a718904acf70c41 Add files via upload
+e59d55cf6db7360c1141fb2a8f0bc945dd60aedc Add files via upload
+1cbf85fe08036ceb6e2c42ac69136b5435b0ae37 Add files via upload
+662362db8919ed8135cdb0c4057be7bb1d8568ad Add files via upload
+7fe8d9cde8009cbc43a2ce8304a7b940f6b1bb65 Add files via upload
+fea8e4874a874107322fbc93b65ebe82f788c56c Add files via upload
+6d06e76d38ddc480a2144b13fd63e67543a745cc Add files via upload
+868ce99152b602b1f2636895402d071275291d1a Add files via upload
+b532902e5a54d3aa8eb1ab775af8ff58c655958a Stone Texture, Text Fixes
+93bdefd97a028755940d8430a0fdedab5d342e2b Added box2d 32bit version and added box2d objects + world to game
+79af15c02f690aa40eb68d7913c9d69447910319 Merged
+91ca16561e2a4e01848cbb5fc4a513326c9d0af9 Fixed movement being asked for twice
+482a132270be12a25a737e0fe2d3adf04a9a3aa0 Add files via upload
+aa2d2d43bfa4df9d13ef761e93cd750d986d3070 Add files via upload
+ce6a7e1cd8851601b13b13b425a62baad3b0cc87 Merge pull request #7 from mbj3650/pathfix-test
+b3f054b47fa8d15ea40c6a47c3420628d6eb33c5 Merge branch 'Path-fixes' into pathfix-test
+c1a95c192f56598c89eba14cd297c072016217db Add files via upload
+ba008ff24feeda5d7f9a28ef236c7d99ba6b4a16 Add files via upload
+b999b73fdda2fedb8cf56deae1564f20fb24dbc8 (origin/Path-fixes, Path-fixes) Added path checking function to see if player can go to a certain tile
+5f3e2cd7b1f2a916c675c36840a0493459b4b7b8 Added path checking function to see if player can go to a certain tile
+6fed179257774afa29d665ab29b27bdfb3bf8d0b Added random start/end tile making
+9a7747885cbdb36dcef251d75b7132fceeab008d DynamicText and lib files
+c3520cd894ea55f519d3e07abf86e05dddfe9b72 Added correct files
+a0bf15823547a07f2b5148f84e12cc57bbbd1fc1 Fixed dependency on folder out of reach
+ec4691801db4741b59af66cfc0c1d36764c94f92 Added all required files for base project
+11357036b5b93fd46b9c3f9f92146bda230fc4e3 Add project files.
+603c45fee2ba6b48e3b5f382906324198c3864c4 Add .gitattributes and .gitignore.
+
